@@ -162,7 +162,7 @@ Replaygain tags:
     <dd>
         <ul>
           <li><code>@artist</code>, if no sound team information is available.</li>
-          <li><code>@publisher</code></li>
+          <li><code>@company</code> / <code>@publisher</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
