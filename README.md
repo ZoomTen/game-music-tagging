@@ -95,6 +95,7 @@ Player-specific tags:
 
 * ALBUMARTIST (audacious, foobar)
 * COMPOSER (audacious)
+* COPYRIGHT (audacious)
 * CUESHEET (xmplay)
 * DATE (foobar, xmplay)
 * DISCNUMBER (foobar)
