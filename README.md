@@ -375,6 +375,7 @@ These commands do not have a value.
 * `company`
   * The company which produced the game.
   * Players that only have a `Publisher` field should instead append its contents into that field.
+  * If no `Publisher` field is available, and no `artist`, `composer` and `sequencer` tags are defined either, this should go into the `Artist` field as a fallback.
   * Should not be overridden as a local tag.
 * `publisher`
   * The company which published the game, if it differs from the company producing it.
