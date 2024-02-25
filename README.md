@@ -46,9 +46,6 @@ This document is a proposal to adapt vgmstream's `!tags.m3u` format to older seq
   <dt>HES</dt>
 
   <dt>SID (Commodore 64)</dt>
-  <dd>ID666; see https://wiki.superfamicom.org/spc-and-rsn-file-format<br>One file each track.</dd>
-  
-  <dt>SNSF (SNES)</dt>
   <dd>Refers to the STIL (SID Tune Information List): https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt
 Refers to Songlength.md5; see https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/Songlength.md5</dd>
 </dl>
