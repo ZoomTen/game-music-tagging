@@ -339,7 +339,11 @@ Replaygain tags:
 
 ### Tags
 * `album`
-* `publisher` / `company`
+* `company`
+  * The company who produced the game.
+  * Players who only have a `Publisher` field should instead append its contents into that field.
+* `publisher`
+  * The company who published the game, if it differs from the company producing it.
 * `artist`
 * `year`
 * `ripper`
