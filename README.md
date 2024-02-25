@@ -1,18 +1,18 @@
-# !tags.m3u proposal for retro soundtrack rips
+# Proposal for a new tags format for retro soundtrack rips
 
-(One-file-to-rule-them-all; if possible)
+This document is a proposal to adapt vgmstream's `!tags.m3u` format to older sequenced formats to better standardize sound rips.
+
+Yet another standard is sorely needed, as *sequenced* sound rips have suffered from rag-tag tagging, limited facilities from the formats themselves, and the only other option being to give up and just use VGM—especially as the VGM format itself over time adds support for more and more sound chips.
 
 ## Abstract
 
-Original post: https://github.com/libgme/game-music-emu/issues/85
+Tagging is a long standing issue that has plagued old sequenced rips for over the last 20 years. Typically rips for NSF, GBS, etc. are shared in standalone files. You are forced cycle through the subtunes to find that one song you want to listen to. Additionally, they have a default time like 5 minutes or 3 minutes. There's a few formats like NSFE that address the time issue (but vary in granularity), but each format requires a custom tool, a new format (some of which die an unceremonious death like GBSX), and still don't tackle the issue of subtune cycling.
 
-> Tagging is a long standing issue that has plagued old sequenced rips for over the last 20 years. Typically rips for NSF, GBS, etc. are shared in standalone files. You are forced cycle through the subtunes to find that one song you want to listen to. Additionally, they have a default time like 5 minutes or 3 minutes. There's a few formats like NSFE that address the time issue (but vary in granularity), but each format requires a custom tool, a new format (some of which die an unceremonious death like GBSX), and still don't tackle the issue of subtune cycling.
+One solution to this problem was M3U tagging. A fine solution until you see the actual contents of the M3U files. This is very close to a perfect solution with a major problem. Each song has metadata shoved into one line to conform to winamp's (and I would assume others') limitations. When a song it played in winamp from a M3U file, it is only aware of a single line from the M3U file. It's not aware of the comments. Additionally, the individual M3U files for songs are not aware of the metadata in the playlist M3U file so the metadata must be duplicated. Hence when plugin author's resorted to variants of the format you see above and the formats different ever so slightly between plugins. It's a major tech debt item that authors have simply worked around. But in the end, it does the job. However, taggers pay the price because the format is not intuitive.
 
-> One solution to this problem was M3U tagging. A fine solution until you see the actual contents of the M3U files. This is very close to a perfect solution with a major problem. Each song has metadata shoved into one line to conform to winamp's (and I would assume others') limitations. When a song it played in winamp from a M3U file, it is only aware of a single line from the M3U file. It's not aware of the comments. Additionally, the individual M3U files for songs are not aware of the metadata in the playlist M3U file so the metadata must be duplicated. Hence when plugin author's resorted to variants of the format you see above and the formats different ever so slightly between plugins. It's a major tech debt item that authors have simply worked around. But in the end, it does the job. However, taggers pay the price because the format is not intuitive.
+`!tags.m3u` is a format from the [vgmstream](https://github.com/vgmstream/vgmstream/blob/master/doc/USAGE.md#tagging) library, the definitive streamed music library. There's a plethora of streamed formats so most stream rips resort to `!tags.m3u` and `.txtp` for extra metadata for all streamed formats. `!tags.m3u` is a static filename that is located at the base of the rip and contains metadata for all the rips in one file.
 
-> `!tags.m3u` is a format from the [vgmstream](https://github.com/vgmstream/vgmstream/blob/master/doc/USAGE.md#tagging) library, the definitive streamed music library. There's a plethora of streamed formats so most stream rips resort to `!tags.m3u` and `.txtp` for extra metadata for all streamed formats. `!tags.m3u` is a static filename that is located at the base of the rip and contains metadata for all the rips in one file.
-
-This document is a proposal to adapt vgmstream's `!tags.m3u` format to older sequenced formats to better standardize sound rips.
+(Original post: https://github.com/libgme/game-music-emu/issues/85)
 
 ## Existing extended tagging formats
 
@@ -40,6 +40,8 @@ This document is a proposal to adapt vgmstream's `!tags.m3u` format to older seq
 
 ### Requires sidecar
 
+"Sidecar" meaning, the tags are stored in an external file, and they are referenced by the rip.
+
 <dl>
   <dt>GBS (Game Boy 8-bit)</dt>
   <dd>No intended standard (and no room for it, either); existing HCS64 rips use Knurek’s comments format in conjunction with the NEZPlug++ tagging format; see https://forums.bannister.org/ubbthreads.php?ubb=showflat&Number=78196#Post78196 and https://nezplug.sourceforge.net/in_nez.txt<br>One of two formats parsed by Game_Music_Emu.</dd>
@@ -55,7 +57,7 @@ This document is a proposal to adapt vgmstream's `!tags.m3u` format to older seq
 Refers to Songlength.md5; see https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/Songlengths.md5 and https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/Songlengths.faq</dd>
 </dl>
 
-## Comparison
+### Comparison
 
 Notes:
 
@@ -215,7 +217,7 @@ Pictionary.nsf::NSF,1,Title Screen,1:34,-,10,
 # .. more entries here
 ```
 
-## Approximate list of tags supported by vgmplay plugins
+## Approximate list of tags already supported by vgmplay plugins
 
 Basic tags:
 
@@ -251,7 +253,104 @@ Replaygain tags:
 * `REPLAYGAIN_TRACK_GAIN`
 * `REPLAYGAIN_TRACK_PEAK`
 
-## Mapping of legacy GME tags to !tags.m3u tags
+## `!tags.m3u` format proposal for sequenced formats
+
+### Example
+
+`!tags.m3u`
+```
+# @album	Das Geheimnis der Happy Hippo-Insel
+# @company	Kritzelkratz 3000, Infogrames
+# @artist	Stello Doussis
+# @year		2000-05-17
+# @ripper	DevEd
+# @tagger	DevEd
+# @source	CGB-BHOD-GER.gbs
+
+# %title	Title Screen
+# %subtune	0
+# %length	0:02:03.000
+# %fade		0:00:10.000
+01 Title Screen.m3u
+```
+
+`01 Title Screen.m3u`
+```
+01 Title Screen.m3u.gbs
+```
+
+### General information
+
+All tags follow the same rules as in the vgmstream specification, with the general tag format being: `# <Sigil><Tag> <Value>`. Or, in terms of [cryptic regex-runes](https://regex101.com/): `#\s*([\$@%])(\w+)\s+(.+)$|#\s*\$(\w+)\s*$`. The sigils are:
+
+* `$` - representing a global command, see below.
+* `@` - representing a global tag, which applies to all tracks, unless overridden by a local tag.
+* `%` - representing a local tag, which applies to the track directly underneath the containing comment block.
+
+### Global commands
+
+These commands do not have a value.
+
+* `$autotrack` - When specified, track numbers don't need to be specified manually.
+* `$autoalbum` - When specified, the directory name is taken as an album name.
+
+### List of proposed tags
+
+* `album`
+  * The title of the game.
+  * Should not be overridden as a local tag.
+* `company`
+  * The company which produced the game.
+  * Players that only have a `Publisher` field should instead append its contents into that field.
+  * If no `Publisher` field is available, and no `artist`, `composer` and `sequencer` tags are defined either, this should go into the `Artist` field as a fallback.
+  * Should not be overridden as a local tag.
+* `publisher`
+  * The company which published the game, if it differs from the company producing it.
+  * Supporting players can insert this into their `Publisher` field.
+  * Should not be overridden as a local tag.
+* `artist`
+  * The artist for either a single track (local tag) or assumed artist for all tracks (global tag) unless specified otherwise.
+  * If specified as a global tag, then players should use this as a default for the `Artist` field, and, if supported, be placed into the `Album Artist` field as well.
+  * Local tags for a track should replace global tags. If the global tag defines `Junichi Masuda`, but a local tag for a track defines `Go Ichinose`, then the resulting `Artist` tag should be `Go Ichinose`, not `Go Ichinose, Junichi Masuda`. The album artist should remain `Junichi Masuda`, however.
+  * When either `composer`, `sequencer` and `engineer` are defined, the `artist` tag should not be read; instead it is a combination of `composer` and `sequencer`.
+* `composer`
+  * The composer for either a single track (local tag) or assumed composer for all tracks (global tag) unless specified otherwise. This is the person who writes the game's score.
+  * If specified as a global tag, then players should use this as a default for the `Composer` field.
+  * Local tags for a track should replace global tags, see `artist`.
+  * May be combined with `sequencer` to create the `artist` field.
+* `sequencer`
+  * The sequencer for either a single track (local tag) or assumed sequencer for all tracks (global tag) unless specified otherwise. This is the person who transcribes the composer's score into the game's format.
+  * May be combined with `composer` to create the `artist` field.
+* `engineer`
+  * The engineer for either a single track (local tag) or assumed engineer for all tracks (global tag) unless specified otherwise. I assume this is the person who wrote the sound driver.
+  * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
+* `year`
+  * Year of game's release, MUST be an integer in YYYY format.
+* `date`
+  * MUST be in YYYY-MM-DD format.
+  * Supporting players can just insert this into their `Date` field.
+  * The year field can be extracted and put into the player's `Year` field. This goes for both players that support `Date` and otherwise.
+* `ripper`
+  * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
+* `tagger`
+  * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
+* `source`
+  * Link to the game rip file.
+* `title`
+  * The title of the track. This should be its composer given name, or if unavailable, the part of the game it plays on. Consider: https://www.youtube.com/watch?v=AbBpQTkTFF4
+  * Supporting players can insert this into their `Title` field.
+* `subtune`
+  * ID of song within the game rip file, should be **0-indexed**.
+  * Supporting players can insert this into their `Track Number` field, incrementing it by 1 in the process.
+* `length`
+  * Length of song before the loop, MUST be in H:MM:SS.MMM format.
+* `fade`
+  * How long to fade out the song after the last loop, in H:MM:SS.MMM format.
+  * Songs that don't loop should have a fade of 0:00:00.000.
+* `comment`
+  * Notes or trivia concerning this track or the game rip.
+
+### Mapping of legacy GME tags to !tags.m3u tags
 
 <details><summary>
 <code># Game: xxx</code> / <code># @TITLE xxx</code>
@@ -453,12 +552,12 @@ Replaygain tags:
 </dl>
 </details>
 
-## Potential differences to vgmstream
+### Potential differences to vgmstream
 
 * Only tags without spaces should be supported.
 * TXTP files isn't necessary.
 
-## Additional considerations
+### Additional considerations
 
 * Audacious **does not support** nested M3U's, while VLC **does**. Winamp, XMPlay, Foobar2000 support currently unknown to the author.
 * Some players like Audacious supports URLs with subtunes in them, e.g. suffixed with `?1`, `?2`.
@@ -476,92 +575,3 @@ Like this document, all of them are works in progress.
   * Added on top of the updates to libgme.
   * Still works by loading in the gbs file, not the m3u. Although, m3u would work provided the files are the `Actual Rip (2024)[GBC].gbs?1` with the subtune suffixes.
 * [Preliminary support in Zumi's gbstools](https://gitgud.io/zumi-gbs/hcs/gbstools/-/blob/master/gbsdist.py)
-
-## `!tags.m3u` format proposal for sequenced formats
-
-All tags follow the same rules as in the vgmstream specification, with the general tag format being: `# <Sigil><Tag> <Value>`. Or, in terms of [cryptic regex-runes](https://regex101.com/): `#\s*([\$@%])(\w+)\s+(.+)$|#\s*\$(\w+)\s*$`. The sigils are:
-
-* `$` - representing a global command, see below.
-* `@` - representing a global tag, which applies to all tracks unless overridden by a local tag.
-* `%` - representing a local tag, which applies to the track directly underneath the containing comment block.
-
-### Global commands
-
-These commands do not have a value.
-
-* `$autotrack` - When specified, track numbers don't need to be specified manually.
-* `$autoalbum` - When specified, the directory name is taken as an album name.
-
-### Tags
-
-* `album`
-  * The title of the game.
-  * Should not be overridden as a local tag.
-* `company`
-  * The company which produced the game.
-  * Players that only have a `Publisher` field should instead append its contents into that field.
-  * If no `Publisher` field is available, and no `artist`, `composer` and `sequencer` tags are defined either, this should go into the `Artist` field as a fallback.
-  * Should not be overridden as a local tag.
-* `publisher`
-  * The company which published the game, if it differs from the company producing it.
-  * Supporting players can insert this into their `Publisher` field.
-  * Should not be overridden as a local tag.
-* `artist`
-  * The artist for either a single track (local tag) or assumed artist for all tracks (global tag) unless specified otherwise.
-  * If specified as a global tag, then players should use this as a default for the `Artist` field, and, if supported, be placed into the `Album Artist` field as well.
-  * Local tags for a track should replace global tags. If the global tag defines `Junichi Masuda`, but a local tag for a track defines `Go Ichinose`, then the resulting `Artist` tag should be `Go Ichinose`, not `Go Ichinose, Junichi Masuda`. The album artist should remain `Junichi Masuda`, however.
-  * When either `composer`, `sequencer` and `engineer` are defined, the `artist` tag should not be read; instead it is a combination of `composer` and `sequencer`.
-* `composer`
-  * The composer for either a single track (local tag) or assumed composer for all tracks (global tag) unless specified otherwise. This is the person who writes the game's score.
-  * If specified as a global tag, then players should use this as a default for the `Composer` field.
-  * Local tags for a track should replace global tags, see `artist`.
-  * May be combined with `sequencer` to create the `artist` field.
-* `sequencer`
-  * The sequencer for either a single track (local tag) or assumed sequencer for all tracks (global tag) unless specified otherwise. This is the person who transcribes the composer's score into the game's format.
-  * May be combined with `composer` to create the `artist` field.
-* `engineer`
-  * The engineer for either a single track (local tag) or assumed engineer for all tracks (global tag) unless specified otherwise. I assume this is the person who wrote the sound driver.
-  * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
-* `year`
-  * Year of game's release, MUST be an integer in YYYY format.
-* `date`
-  * MUST be in YYYY-MM-DD format.
-  * Supporting players can just insert this into their `Date` field.
-  * The year field can be extracted and put into the player's `Year` field. This goes for both players that support `Date` and otherwise.
-* `ripper`
-  * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
-* `tagger`
-  * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
-* `source`
-  * Link to the game rip file.
-* `title`
-  * The title of the track. This should be its composer given name, or if unavailable, the part of the game it plays on. Consider: https://www.youtube.com/watch?v=AbBpQTkTFF4
-  * Supporting players can insert this into their `Title` field.
-* `subtune`
-  * ID of song within the game rip file, should be **0-indexed**.
-  * Supporting players can insert this into their `Track Number` field, incrementing it by 1 in the process.
-* `length`
-  * Length of song before the loop, MUST be in H:MM:SS.MMM format.
-* `fade`
-  * How long to fade out the song after the last loop, in H:MM:SS.MMM format.
-  * Songs that don't loop should have a fade of 0:00:00.000.
-* `comment`
-  * Notes or trivia concerning this track or the game rip.
-
-### Example
-
-```
-# @album	Das Geheimnis der Happy Hippo-Insel
-# @company	Kritzelkratz 3000, Infogrames
-# @artist	Stello Doussis
-# @year		2000-05-17
-# @ripper	DevEd
-# @tagger	DevEd
-# @source	CGB-BHOD-GER.gbs
-
-# %title	Title Screen
-# %subtune	0
-# %length	0:02:03.000
-# %fade		0:00:10.000
-01 Title Screen.m3u
-```
