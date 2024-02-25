@@ -3,13 +3,14 @@
 (One-file-to-rule-them-all; if possible)
 
 ## Abstract
+
 Original post: https://github.com/libgme/game-music-emu/issues/85
 
 > Tagging is a long standing issue that has plagued old sequenced rips for over the last 20 years. Typically rips for NSF, GBS, etc. are shared in standalone files. You are forced cycle through the subtunes to find that one song you want to listen to. Additionally, they have a default time like 5 minutes or 3 minutes. There's a few formats like NSFE that address the time issue (but vary in granularity), but each format requires a custom tool, a new format (some of which die an unceremonious death like GBSX), and still don't tackle the issue of subtune cycling.
 
 > One solution to this problem was M3U tagging. A fine solution until you see the actual contents of the M3U files. This is very close to a perfect solution with a major problem. Each song has metadata shoved into one line to conform to winamp's (and I would assume others') limitations. When a song it played in winamp from a M3U file, it is only aware of a single line from the M3U file. It's not aware of the comments. Additionally, the individual M3U files for songs are not aware of the metadata in the playlist M3U file so the metadata must be duplicated. Hence when plugin author's resorted to variants of the format you see above and the formats different ever so slightly between plugins. It's a major tech debt item that authors have simply worked around. But in the end, it does the job. However, taggers pay the price because the format is not intuitive.
 
-> `!tags.m3u` is a format from the [vgmstream](https://github.com/vgmstream/vgmstream/blob/master/doc/USAGE.md#tagging) library, the definitive streamed music library. There's a plethora of streamed formats so most stream rips resort to `!tags.m3u` and `.txtp` for extra metadata for all streamed formats. `!tags.m3u` is a static filename that is located at the base of the rip and contains metadata for all the rips in one file. 
+> `!tags.m3u` is a format from the [vgmstream](https://github.com/vgmstream/vgmstream/blob/master/doc/USAGE.md#tagging) library, the definitive streamed music library. There's a plethora of streamed formats so most stream rips resort to `!tags.m3u` and `.txtp` for extra metadata for all streamed formats. `!tags.m3u` is a static filename that is located at the base of the rip and contains metadata for all the rips in one file.
 
 This document is a proposal to adapt vgmstream's `!tags.m3u` format to older sequenced formats to better standardize sound rips.
 
@@ -20,20 +21,20 @@ This document is a proposal to adapt vgmstream's `!tags.m3u` format to older seq
 <dl>
   <dt>VGM / VGZ (multi-system, usually Sega)</dt>
   <dd>GD3 format, analogous to MP3’s ID3; see https://vgmrips.net/wiki/GD3_Specification<br>One file each track.</dd>
-  
-  <dt>SPC / RSN (SNES)</dt>
-  <dd>ID666; see https://wiki.superfamicom.org/spc-and-rsn-file-format<br>One file each track.</dd>
-  
-  <dt>SNSF (SNES)</dt>
+
+<dt>SPC / RSN (SNES)</dt>
+  <dd>ID666 and XID6; see https://wiki.superfamicom.org/spc-and-rsn-file-format<br>One file each track.</dd>
+
+<dt>SNSF (SNES)</dt>
   <dd>Implements PSF-style tagging; see http://snsf.caitsith2.net/snsf%20spec.txt and https://gist.githubusercontent.com/SaxxonPike/a0b47f8579aad703b842001b24d40c00/raw/a6fa28b44fb598b8874923dbffe932459f6a61b9/psf_format.txt</dd>
-  
-  <dt>NSFE (NES)</dt>
+
+<dt>NSFE (NES)</dt>
   <dd>RIFF with embedded NSF; see https://www.nesdev.org/wiki/NSFe</dd>
-  
-  <dt>NSF2 (NES)</dt>
+
+<dt>NSF2 (NES)</dt>
   <dd>NSF with embedded RIFF; see https://www.nesdev.org/wiki/NSF2</dd>
-  
-  <dt>GBSX (Game Boy 8-bit)</dt>
+
+<dt>GBSX (Game Boy 8-bit)</dt>
   <dd>Discontinued format, can either be embedded or as sidecar; see https://raw.githubusercontent.com/mmitch/gbsplay/05b68b8ff0b1faa6a2f1c987a34c564b28cde1fe/gbsformat.txt</dd>
 </dl>
 
@@ -42,17 +43,140 @@ This document is a proposal to adapt vgmstream's `!tags.m3u` format to older seq
 <dl>
   <dt>GBS (Game Boy 8-bit)</dt>
   <dd>No intended standard (and no room for it, either); existing HCS64 rips use Knurek’s comments format in conjunction with the NEZPlug++ tagging format; see https://forums.bannister.org/ubbthreads.php?ubb=showflat&Number=78196#Post78196 and https://nezplug.sourceforge.net/in_nez.txt<br>One of two formats parsed by Game_Music_Emu.</dd>
-  
-  <dt>HES (PC Engine)</dt>
+
+<dt>HES (PC Engine)</dt>
   <dd>Same as GBS, except 4 bytes are at least reserved in the format.</dd>
-  
-  <dt>NSF (NES)</dt>
+
+<dt>NSF (NES)</dt>
   <dd>Same as GBS, although NSF2 at least is an improvement.</dd>
 
-  <dt>SID (Commodore 64)</dt>
+<dt>SID (Commodore 64)</dt>
   <dd>Refers to the STIL (SID Tune Information List): https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt<br>
-Refers to Songlength.md5; see https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/Songlength.md5</dd>
+Refers to Songlength.md5; see https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/Songlengths.md5 and https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/Songlengths.faq</dd>
 </dl>
+
+## Comparison
+
+Notes:
+
+* This does not consider hardware-related information such as clock speeds and patch sets.
+* Release dates may be *implied* by the copyright string even if they do not appear in the table.
+* `(time)` means a HH:MM:SS.MMM format.
+* In the HCS64 m3u format, notes *may* be added, but they are simply ignored by players, as there is no way of reliably parsing these.
+* Table takes into account the format the tags are extending (e.g. GBS for GBSX, STIL for SID, etc.)
+
+<table>
+    <tr>
+        <th>Quality\Format</th>
+        <th scope="column">GD3</th>
+        <th scope="column">ID666 + XID6</th>
+        <th scope="column">PSF</th>
+        <th scope="column">NSF{E,2}</th>
+        <th scope="column">GBSX</th>
+        <th scope="column">HCS64.m3u</th>
+        <th scope="column">STIL</th>
+    </tr>
+    <tr>
+        <th scope="row">Track name</th>
+        <td>Yes ×2</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>Yes [NSFE/2]</td>
+        <td>Yes [GBSX]</td>
+        <td>Yes</td>
+        <td>Yes [STIL]</td>
+    </tr>
+    <tr>
+        <th scope="row">Game name</th>
+        <td>Yes ×2</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <th scope="row">Release date</th>
+        <td>Month and date optional</td>
+        <td>Year [XID6]</td>
+        <td>Year</td>
+        <td></td>
+        <td></td>
+        <td>Month and date optional</td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">Track credits</th>
+        <td>Author</td>
+        <td><ul><li>Author</li><li>Publisher [XID6]</li></ul></td>
+        <td><ul><li>Author</li><li>Copyright string</li></ul></td>
+        <td><ul><li>Author</li><li>Copyright string</li></ul></td>
+        <td><ul><li>Author</li><li>Copyright string</li></ul></td>
+        <td><ul><li>Composer</li><li>Arranger</li><li>Sequencer</li><li>Engineer</li><li>Company/Publisher</li></ul></td>
+        <td><ul><li>Author [STIL]</li><li>Copyright string</li></ul></td>
+    </tr>
+    <tr>
+        <th scope="row">Rip credits</th>
+        <td>Logger</td>
+        <td><ul><li>Dumper</li><li>Date of Dump</li><li>Emulator (enumerated)</li></ul></td>
+        <td>PSF creator</td>
+        <td>Ripper</td>
+        <td></td>
+        <td><ul><li>Ripper</li><li>tagger</li></ul></td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">Playback metadata</th>
+        <td><ul><li>Duration (samples)</li><li>Loop begin (samples)</li><li>Loop length (samples)</li></ul></td>
+        <td><ul><li>Duration (seconds)</li><li>fade (miliseconds)</li><li>Channel masks</li><li>Loop data (tick) [XID6]</li><li>Preamp level [XID6]</li></ul></td>
+        <td><ul><li>Preamp level</li><li>Duration (time)</li><li>Fade (time)</li></ul></td>
+        <td>All NSFE/2:<ul><li>Duration (miliseconds)</li><li>fade (miliseconds)</li><li>Playlist order, Music/SFX differentiation</li><li>Per-channel mixing levels</li></ul></td>
+        <td>Duration (ticks) [GBSX]</td>
+        <td><ul><li>Duration (time)</li><li>Loop (time)</li><li>Fade (time)</li><li>Loop count (time)</li></ul></td>
+        <td>Duration (time)</td>
+    </tr>
+    <tr>
+        <th scope="row">Tag defined for</th>
+        <td>One track = one file</td>
+        <td>One track = one file</td>
+        <td>One track = one file</td>
+        <td>Many tracks = one file; each track may have unique info [NSFE/2]</td>
+        <td>Many tracks = one file; each track may have unique info [GBSX]</td>
+        <td>Many tracks = one file; one track = one file.</td>
+        <td>Many tracks = one file; each track may have unique info [STIL, Songlength]</td>
+    </tr>
+    <tr>
+        <th scope="row">Tag placement</th>
+        <td>Embedded</td>
+        <td>Embedded</td>
+        <td>Embedded</td>
+        <td>Embedded</td>
+        <td>Embedded, or sidecar [GBSX]</td>
+        <td>Sidecar</td>
+        <td>Embedded, or sidecar [STIL, Songlength]</td>
+    </tr>
+    <tr>
+        <th scope="row">Other metadata</th>
+        <td>Notes</td>
+        <td><ul><li>Notes</li><li>OST name [XID6]</li><li>OST track number [XID6]</li></ul></td>
+        <td><ul><li>Notes</li><li>Genre</li></ul></td>
+        <td>Notes</td>
+        <td>Notes</td>
+        <td></td>
+        <td>Notes</td>
+    </tr>
+    <tr>
+        <th scope="row">System name</th>
+        <td>Yes</td>
+        <td></td>
+        <td>Enumerated</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
 
 ## M3U sidecar formats supported by Game_Music_Emu
 
@@ -341,7 +465,7 @@ Replaygain tags:
 * libgme has 1-indexed subtunes.
 * vgmstream's design seems to be intentionally player-specific.
   * **Pro**: there little parsing work to be done, the design kept relatively simple
-  * **Con**: a risk of redundant data being entered when a player supports more granular fields (like `Composer` and `Date`), while players with less granular fields (like `Artist` and `Year`) is to also be supported. Either go with the lowest-common denominator, or input redundant data. Can be automated somewhat, but overall a hassle. 
+  * **Con**: a risk of redundant data being entered when a player supports more granular fields (like `Composer` and `Date`), while players with less granular fields (like `Artist` and `Year`) is to also be supported. Either go with the lowest-common denominator, or input redundant data. Can be automated somewhat, but overall a hassle.
 
 ## Proof of concepts
 
@@ -369,6 +493,7 @@ These commands do not have a value.
 * `$autoalbum` - When specified, the directory name is taken as an album name.
 
 ### Tags
+
 * `album`
   * The title of the game.
   * Should not be overridden as a local tag.
@@ -424,6 +549,7 @@ These commands do not have a value.
   * Notes or trivia concerning this track or the game rip.
 
 ### Example
+
 ```
 # @album	Das Geheimnis der Happy Hippo-Insel
 # @company	Kritzelkratz 3000, Infogrames
