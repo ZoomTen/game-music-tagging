@@ -43,10 +43,14 @@ This document is a proposal to adapt vgmstream's `!tags.m3u` format to older seq
   <dt>GBS (Game Boy 8-bit)</dt>
   <dd>No intended standard (and no room for it, either); existing HCS64 rips use Knurek’s comments format in conjunction with the NEZPlug++ tagging format; see https://forums.bannister.org/ubbthreads.php?ubb=showflat&Number=78196#Post78196 and https://nezplug.sourceforge.net/in_nez.txt<br>One of two formats parsed by Game_Music_Emu.</dd>
   
-  <dt>HES</dt>
+  <dt>HES (PC Engine)</dt>
+  <dd>Same as GBS, except 4 bytes are at least reserved in the format.</dd>
+  
+  <dt>NSF (NES)</dt>
+  <dd>Same as GBS, although NSF2 at least is an improvement.</dd>
 
   <dt>SID (Commodore 64)</dt>
-  <dd>Refers to the STIL (SID Tune Information List): https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt
+  <dd>Refers to the STIL (SID Tune Information List): https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/STIL.txt<br>
 Refers to Songlength.md5; see https://www.hvsc.c64.org/download/C64Music/DOCUMENTS/Songlength.md5</dd>
 </dl>
 
