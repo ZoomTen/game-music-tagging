@@ -98,29 +98,29 @@ Basic tags:
 
 Player-specific tags:
 
-* ALBUMARTIST (audacious, foobar)
-* COMPOSER (audacious)
-* COPYRIGHT (audacious)
-* CUESHEET (xmplay)
-* DATE (foobar, xmplay)
-* DISCNUMBER (foobar)
-* FAMILY (winamp)
-* FILETYPE (xmplay)
-* GAIN (winamp)
-* PERFORMER (audacious)
-* PUBLISHER (audacious, winamp)
-* LENGTH (winamp)
-* TRACK (auudacious, winamp, xmplay)
-* TOTALTRACKS (foobar)
-* TRACKNUMBER (foobar, xmplay)
-* YEAR (audacious, winamp)
+* `ALBUMARTIST` (audacious, foobar)
+* `COMPOSER` (audacious)
+* `COPYRIGHT` (audacious)
+* `CUESHEET` (xmplay)
+* `DATE` (foobar, xmplay)
+* `DISCNUMBER` (foobar)
+* `FAMILY` (winamp)
+* `FILETYPE` (xmplay)
+* `GAIN` (winamp)
+* `PERFORMER` (audacious)
+* `PUBLISHER` (audacious, winamp)
+* `LENGTH` (winamp)
+* `TRACK` (auudacious, winamp, xmplay)
+* `TOTALTRACKS` (foobar)
+* `TRACKNUMBER` (foobar, xmplay)
+* `YEAR` (audacious, winamp)
 
 Replaygain tags:
 
-* REPLAYGAIN_ALBUM_GAIN
-* REPLAYGAIN_ALBUM_PEAK
-* REPLAYGAIN_TRACK_GAIN
-* REPLAYGAIN_TRACK_PEAK
+* `REPLAYGAIN_ALBUM_GAIN`
+* `REPLAYGAIN_ALBUM_PEAK`
+* `REPLAYGAIN_TRACK_GAIN`
+* `REPLAYGAIN_TRACK_PEAK`
 
 ## Mapping of legacy GME tags to !tags.m3u tags
 
