@@ -258,7 +258,7 @@ Replaygain tags:
 ### Example
 
 `!tags.m3u`
-```
+```python
 # @album	Das Geheimnis der Happy Hippo-Insel
 # @company	Kritzelkratz 3000, Infogrames
 # @artist	Stello Doussis
@@ -275,7 +275,7 @@ Replaygain tags:
 ```
 
 `01 Title Screen.m3u`
-```
+```python
 01 Title Screen.m3u.gbs
 ```
 
