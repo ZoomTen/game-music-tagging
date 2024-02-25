@@ -319,3 +319,35 @@ Replaygain tags:
     </dd>
 </dl>
 </details>
+
+## `!tags.m3u` format proposal for sequenced foramts
+
+### Tags
+* `album`
+* `company`
+* `artist`
+* `year`
+* `ripper`
+* `tagger`
+* `source`
+* `title`
+* `subtune`
+* `length`
+* `fade`
+
+### Example
+```
+# @album	Das Geheimnis der Happy Hippo-Insel
+# @company	Kritzelkratz 3000, Infogrames
+# @artist	Stello Doussis
+# @year		2000-05-17
+# @ripper	DevEd
+# @tagger	DevEd
+# @source	CGB-BHOD-GER.gbs
+
+# %title	Title Screen
+# %subtune	0
+# %length	0:02:03.000
+# %fade		0:00:10.000
+01 Title Screen.m3u
+```
