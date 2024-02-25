@@ -352,9 +352,9 @@ These commands do not have a value.
 
 ### Mapping of legacy GME tags to !tags.m3u tags
 
-<details><summary>
-<code># Game: xxx</code> / <code># @TITLE xxx</code>
-</summary>
+
+#### `# Game: xxx` / `# @TITLE xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -372,11 +372,10 @@ These commands do not have a value.
         title of the game getting ripped.
     </dd>
 </dl>
-</details>
 
-<details><summary>
-<code># Artist: xxx</code> / <code># @ARTIST xxx</code>
-</summary>
+
+#### `# Artist: xxx` / `# @ARTIST xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -395,11 +394,9 @@ These commands do not have a value.
         and not… uh, the people who produced it. Something to do with the copyright fields?
     </dd>
 </dl>
-</details>
 
-<details><summary>
-<code># @DATE xxx</code>
-</summary>
+#### `# @DATE xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -419,11 +416,9 @@ These commands do not have a value.
         filled in and then the year can be derived from it. But if you <i>really</i> want compatibility, fill both in. But make sure <code>@year</code> is an integer!
     </dd>
 </dl>
-</details>
 
-<details><summary>
-<code># Composer: xxx</code> / <code># @COMPOSER xxx</code>
-</summary>
+#### `# Composer: xxx` / `# @COMPOSER xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -441,11 +436,9 @@ These commands do not have a value.
         -
     </dd>
 </dl>
-</details>
 
-<details><summary>
-<code># @SEQUENCER xxx</code>
-</summary>
+#### `# @SEQUENCER xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -465,11 +458,9 @@ These commands do not have a value.
         since parsing comments are hard.
     </dd>
 </dl>
-</details>
 
-<details><summary>
-<code># Engineer: xxx</code> / <code># @ENGINEER xxx</code>
-</summary>
+#### `# Engineer: xxx` / `# @ENGINEER xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -487,11 +478,9 @@ These commands do not have a value.
         See Sequencer.
     </dd>
 </dl>
-</details>
 
-<details><summary>
-<code># Ripping: xxx</code> / <code># @RIPPER xxx</code>
-</summary>
+#### `# Ripping: xxx` / `# @RIPPER xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -510,9 +499,8 @@ These commands do not have a value.
 </dl>
 </details>
 
-<details><summary>
-<code># Tagging: xxx</code> / <code># @TAGGER xxx</code>
-</summary>
+#### `# Tagging: xxx` / `# @TAGGER xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -529,11 +517,9 @@ These commands do not have a value.
         See Sequencer.
     </dd>
 </dl>
-</details>
 
-<details><summary>
-<code># Copyright: xxx</code>
-</summary>
+#### `# Copyright: xxx`
+
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
@@ -550,7 +536,6 @@ These commands do not have a value.
         -
     </dd>
 </dl>
-</details>
 
 ### Potential differences to vgmstream
 
