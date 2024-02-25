@@ -419,6 +419,8 @@ These commands do not have a value.
 * `fade`
   * How long to fade out the song after the last loop, in H:MM:SS.MMM format.
   * Songs that don't loop should have a fade of 0:00:00.000.
+* `comment`
+  * Notes or trivia concerning this track or the game rip.
 
 ### Example
 ```
