@@ -339,17 +339,23 @@ Replaygain tags:
 
 ### Tags
 * `album`
+  * The title of the game.
 * `company`
-  * The company who produced the game.
-  * Players who only have a `Publisher` field should instead append its contents into that field.
+  * The company which produced the game.
+  * Players that only have a `Publisher` field should instead append its contents into that field.
 * `publisher`
-  * The company who published the game, if it differs from the company producing it.
+  * The company which published the game, if it differs from the company producing it.
 * `artist`
 * `year`
 * `ripper`
+  * Can be ignored by the player.
 * `tagger`
+  * Can be ignored by the player.
 * `source`
 * `title`
+  * The title of the track.
+  * This should be its' composer given name, or if unavailable, the part of the game it plays on.
+  * Consider: https://www.youtube.com/watch?v=AbBpQTkTFF4
 * `subtune`
   * Id of song within rip file
 * `length` 
