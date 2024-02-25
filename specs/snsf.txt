@@ -1,0 +1,68 @@
+SNSF Specifications version 0.03
+
+SNSF is a PSF format for the SNES. The header of the file should begin with 'PSF' with a version byte
+of 0x23. Next comes the Reserved section size, Program Section Size, and the Program CRC.
+
+The Reserved section if filled, contains SRAM and/or Savestate data.  The layout of the reserved
+section is as follows.
+
+Offset         Size    Description
+0x00000000     4       Data Type
+0x00000004     4       Size of Data
+0x00000008     XX      Data block.
+
+Sram Data block
+Offset         Size    Description
+0x00000000     4       Offset of SRAM to load
+0x00000004     XX      SRAM data.
+
+These blocks repeat for as many data blocks that reside within the reserved section.
+Currently, the defined Data types are:
+
+0 = SRAM, Max size of 0x20000 bytes.
+1 = Save State.  (Not currently used.)
+2 = Save State Patch (also not currently used.)
+-1 (0xFFFFFFFF) = End of reserved section.  Specify the size as 0.
+
+If the reserved section is less than 9 bytes, you may ignore this section completely.
+
+The program section contains a SNES rom, that has been patched to only play back music.  A good
+quality rip should not be doing anything with any hardware other than the 128Kbyte ram, and the
+Audio Processing Unit. Unnecessary interrupt code should be removed, and those interupts should
+only have a return from interrupt instruction on them.  (RTI, 0x40)
+
+However, the emulator should tolerate access to the other hardware, just in case.  If the rom is
+converted for use on a flash cart, it should run on actual hardware.
+
+(There is only one game so far that needs a special chip, to complete its APU loading routines.
+That game is Star Ocean, and as such, that is the only special chip specifically supported right
+now, due to that games memory mapping requirements.)
+
+The Program is layed out as follows.
+
+Offset         Size    Description
+0x00000000     4       SNSF_Offset
+0x00000004     4       Size of Rom.
+0x00000008     XX      The Rom data itself.
+
+
+The offset/size helps you to know how much rom space to allocate, but is also used for 
+minisnsf/snsflibs.  Look at the official psf specs for lib loading order.  Multiple libs are 
+supported.
+
+The Maximum offset for the main snsflib file, is 0x7F00 for LoROM and 0xFF00 for HiROM.  Minisnsf files
+and any addon _libN snsflib files are allowed to go past these limits.
+
+Finally, Look at the official psf specs for info on how tags are stored.
+
+The following reserved tags are to be implemented into the playback plugin, and faithfully followed.
+
+_memory - Used to force the rom to be loaded either as HiROM, or as LoROM.   The possible tag settings 
+are "HiROM", and "LoROM".  Precedence of forcing is emulator user settings, then minisnsf settings, then
+snsflib settings.
+
+_video - Used to force the video mode.  Possible settings are "NTSC", and "PAL".  Precedence of forcing is
+also emulator user settings, then minisnsf setting, then snsflib settings.
+
+_sramfill - Used to fill the sram with an initial value other that 0xFF by default.  (Some games might require this.)
+In the event that the reserved section contains sram data, then that sram data takes precedence over the sram fill.

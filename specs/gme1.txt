@@ -1,0 +1,49 @@
+AO currently doesn't support NEZPlug's external tagging M3U file format, which can store additional metadata (like, track names, song duration, per track composers, etc) for emulated music formats like NSF, GBS, HES, KSS, SGC and WSR.
+
+I'm pretty sure GME which AO uses does support parsing that M3U format, but I've checked and win32 build of AO can't play them.
+
+Would it be possible to add support to it? For now, people using linux or macOS need to stick to running Winamp/Foobar under Wine if they want to use the extra metadata - having AO support would solve this. smile
+
+If you want some examples of the format, there are some either on Portable Music History or on Kaminari's PC Engine Music Archive
+
+The file format is as follows:
+
+[header]
+
+# @TAG_NAME Tag
+
+Widely used TAG_NAMEs are: @TITLE (Game Name), @ARTIST (Copyright Field), @COMPOSER (Composer Name), @ARRANGER (Arrange Name), @DATE (Date of Game Release), @RIPPER (self-explaining), @TAGGER (ditto)
+
+filename::NSF,[1 based songno|$songno],[title],[time(h:m:s)],[loop(h:m:s)][-],[fade(h:m:s)],[loopcount]
+filename::KSS,[0 based songno|$songno],[title],[time(h:m:s)],[loop(h:m:s)][-],[fade(h:m:s)],[loopcount]
+filename::GBR,[0 based songno|$songno],[title],[time(h:m:s)],[loop(h:m:s)][-],[fade(h:m:s)],[loopcount]
+filename::GBS,[0 based songno|$songno],[title],[time(h:m:s)],[loop(h:m:s)][-],[fade(h:m:s)],[loopcount]
+filename::HES,[0 based songno|$songno],[title],[time(h:m:s)],[loop(h:m:s)][-],[fade(h:m:s)],[loopcount]
+filename::AY ,[0 based songno|$songno],[title],[time(h:m:s)],[loop(h:m:s)][-],[fade(h:m:s)],[loopcount]
+filename::NEZ,[0 based songno|$songno],[title],[time(h:m:s)],[loop(h:m:s)][-],[fade(h:m:s)],[loopcount]
+filename::WSR,[0 based songno|$songno],[title],[time(h:m:s)],[loop(h:m:s)][-],[fade(h:m:s)],[loopcount]
+
+filename song file relative path(*.zip;*.nsf;*.kss;...)
+
+songno 0-based songno(::NSF playlist only has 1-based songno for historical reason.)
+$songno 0-based hexadecimal songno
+
+title song title
+
+time song play time h * 3600 + m * 60 + s (sec)
+Default time(5min) will be used, if time not specified.
+
+loop(h:m:s)
+loop length h * 3600 + m * 60 + s (sec)
+loop(h:m:s-)
+loop start time h * 3600 + m * 60 + s (sec)
+loop(-)
+loop length is equal to play time.
+Song will not loop, if loop not specified,
+
+fade fadeout length h * 3600 + m * 60 + s (sec)
+Default fadeout length(5sec) will be used, if time not specified.
+
+loopcount
+loop count
+Default LoopCount will be used, if time not specified.
