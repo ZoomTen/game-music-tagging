@@ -55,7 +55,11 @@ Refers to Songlength.md5; see https://www.hvsc.c64.org/download/C64Music/DOCUMEN
 
 ## M3U sidecar formats supported by Game_Music_Emu
 
+GME sidecar formats take on the same name as the file it's meant for; e.g. `Pictionary (1990-07)(Software Creations)(LJN).m3u` is read for `Pictionary (1990-07)(Software Creation)(LJN).nsf`.
+
 ### Knurek / HCS64
+
+(the rip on HCS at the time of writing doesn't follow this format…)
 
 ```python
 # @TITLE     Pictionary
@@ -90,11 +94,11 @@ Pictionary.nsf::NSF,1,Title Screen,1:34,-,10,
 
 Basic tags:
 
-* ALBUM
-* ARTIST
-* COMMENT
-* GENRE
-* TITLE
+* `ALBUM`
+* `ARTIST`
+* `COMMENT`
+* `GENRE`
+* `TITLE`
 
 Player-specific tags:
 
@@ -110,7 +114,7 @@ Player-specific tags:
 * `PERFORMER` (audacious)
 * `PUBLISHER` (audacious, winamp)
 * `LENGTH` (winamp)
-* `TRACK` (auudacious, winamp, xmplay)
+* `TRACK` (audacious, winamp, xmplay)
 * `TOTALTRACKS` (foobar)
 * `TRACKNUMBER` (foobar, xmplay)
 * `YEAR` (audacious, winamp)
@@ -134,7 +138,9 @@ Replaygain tags:
     </dd>
     <dt>Should map to</dt>
     <dd>
-        <code>@album</code>
+        <ul>
+            <li><code>@album</code></li>
+        </ul>
     </dd>
     <dt>Rationale</dt>
     <dd>
@@ -155,7 +161,7 @@ Replaygain tags:
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@artist</code>, if no composer information is avaible.</li>
+          <li><code>@artist</code>, if no sound team information is avaible.</li>
           <li><code>@publisher</code></li>
         </ul>
     </dd>
@@ -173,21 +179,20 @@ Replaygain tags:
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
-        The companies who developed and published the game.
+        The companies who developed and published the game. This usually
+        follows YYYY-MM-DD.
     </dd>
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@year</code> - the date information may be truncated and stored here</li>
           <li><code>@date</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
     <dd>
-        The year value in some players is an integer. Both <code>@year</code> and <code>@date</code>
-        can be filled in, if granularity is desired. Ideally, just <code>@date</code> should be
-        filled in and then the year can be derived from it, but I think the existing vgmstream
-        implementations just have a <code>@year</code>.
+        I think the existing vgmstream
+        implementations just have a <code>@year</code>. Ideally, just <code>@date</code> should be
+        filled in and then the year can be derived from it. But if you <i>really</i> want compatibility, fill both in. But make sure <code>@year</code> is an integer!
     </dd>
 </dl>
 </details>
@@ -212,6 +217,7 @@ Replaygain tags:
         -
     </dd>
 </dl>
+</details>
 
 <details><summary>
 <code># @SEQUENCER xxx</code>
@@ -235,6 +241,7 @@ Replaygain tags:
         since parsing comments are hard.
     </dd>
 </dl>
+</details>
 
 <details><summary>
 <code># Engineer: xxx</code> / <code># @ENGINEER xxx</code>
@@ -256,6 +263,7 @@ Replaygain tags:
         See Sequencer.
     </dd>
 </dl>
+</details>
 
 <details><summary>
 <code># Ripping: xxx</code> / <code># @RIPPER xxx</code>
