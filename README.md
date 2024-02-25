@@ -161,7 +161,7 @@ Replaygain tags:
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@artist</code>, if no sound team information is avaible.</li>
+          <li><code>@artist</code>, if no sound team information is available.</li>
           <li><code>@publisher</code></li>
         </ul>
     </dd>
