@@ -8,6 +8,8 @@
 
 https://github.com/libgme/game-music-emu/issues/85
 
+!tags.m3u is a file from the [vgmstream](https://github.com/vgmstream/vgmstream/blob/master/doc/USAGE.md#tagging) specifications.
+
 ## Existing extended tagging formats
 
 ### Embedded
@@ -48,3 +50,266 @@ Refers to Songlength.md5; see https://www.hvsc.c64.org/download/C64Music/DOCUMEN
 
 ## M3U sidecar formats supported by Game_Music_Emu
 
+### Knurek / HCS64
+
+```python
+# @TITLE     Pictionary
+# @ARTIST    Software Creations
+# @DATE      1990-07
+# @COMPOSER  Tim Follin
+# @SEQUENCER Tim Follin
+# @ENGINEER  Stephen Ruddy
+# @RIPPER    Gil Galad
+# @TAGGER    wrldwzrd89
+
+Pictionary.nsf::NSF,1,Title Screen,1:34,-,10,
+# .. more entries here
+```
+
+### not sure what this one's "called"
+
+```python
+# Game:      Pictionary
+# Artist:    Software Creations
+# Copyright: 1990 LJN
+# Composer:  Tim Follin
+# Engineer:  Stephen Ruddy
+# Ripping:   Gil Galad
+# Tagging:   wrldwzrd89
+
+Pictionary.nsf::NSF,1,Title Screen,1:34,-,10,
+# .. more entries here
+```
+
+## Approximate list of tags supported by vgmplay plugins
+
+Basic tags:
+
+* ALBUM
+* ARTIST
+* COMMENT
+* GENRE
+* TITLE
+
+Player-specific tags:
+
+* ALBUMARTIST (audacious, foobar)
+* COMPOSER (audacious)
+* CUESHEET (xmplay)
+* DATE (foobar, xmplay)
+* DISCNUMBER (foobar)
+* FAMILY (winamp)
+* FILETYPE (xmplay)
+* GAIN (winamp)
+* PERFORMER (audacious)
+* PUBLISHER (audacious, winamp)
+* LENGTH (winamp)
+* TRACK (auudacious, winamp, xmplay)
+* TOTALTRACKS (foobar)
+* TRACKNUMBER (foobar, xmplay)
+* YEAR (audacious, winamp)
+
+Replaygain tags:
+
+* REPLAYGAIN_ALBUM_GAIN
+* REPLAYGAIN_ALBUM_PEAK
+* REPLAYGAIN_TRACK_GAIN
+* REPLAYGAIN_TRACK_PEAK
+
+## Mapping of legacy GME tags to !tags.m3u tags
+
+<details><summary>
+<code># Game: xxx</code> / <code># @TITLE xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        The name of the game the file is a soundtrack rip of.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <code>@album</code>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        This tag does not specify track titles, but the
+        title of the game getting ripped.
+    </dd>
+</dl>
+</details>
+
+<details><summary>
+<code># Artist: xxx</code> / <code># @ARTIST xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        The companies who developed and published the game.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <ul>
+          <li><code>@artist</code>, if no composer information is avaible.</li>
+          <li><code>@publisher</code></li>
+        </ul>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        For some reason, "Artist" represents the corporate entity who owns the music,
+        and not… uh, the people who produced it. Something to do with the copyright fields?
+    </dd>
+</dl>
+</details>
+
+<details><summary>
+<code># @DATE xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        The companies who developed and published the game.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <ul>
+          <li><code>@year</code> - the date information may be truncated and stored here</li>
+          <li><code>@date</code></li>
+        </ul>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        The year value in some players is an integer. Both <code>@year</code> and <code>@date</code>
+        can be filled in, if granularity is desired. Ideally, just <code>@date</code> should be
+        filled in and then the year can be derived from it, but I think the existing vgmstream
+        implementations just have a <code>@year</code>.
+    </dd>
+</dl>
+</details>
+
+<details><summary>
+<code># Composer: xxx</code> / <code># @COMPOSER xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        The musician who wrote the score to the track.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <ul>
+          <li><code>@artist</code></li>
+          <li><code>@composer</code></li>
+        </ul>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        -
+    </dd>
+</dl>
+
+<details><summary>
+<code># @SEQUENCER xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        The programmer responsible for transferring the composer's score to
+        the in-game format.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <ul>
+          <li><code>@sequencer</code></li>
+        </ul>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        No such tag may have conventionally existed, but this tag can
+        be reserved for players that can display such specific information,
+        since parsing comments are hard.
+    </dd>
+</dl>
+
+<details><summary>
+<code># Engineer: xxx</code> / <code># @ENGINEER xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        Not much examples I can find, but I suspect this could
+        be the person writing the sound engine, for example.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <ul>
+          <li><code>@engineer</code></li>
+        </ul>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        See Sequencer.
+    </dd>
+</dl>
+
+<details><summary>
+<code># Ripping: xxx</code> / <code># @RIPPER xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        The person who ripped the soundtrack into a playable file.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <ul>
+          <li><code>@ripper</code></li>
+        </ul>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        See Sequencer.
+    </dd>
+</dl>
+</details>
+
+<details><summary>
+<code># Tagging: xxx</code> / <code># @TAGGER xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        The person who identified and tagged an existing rip.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <ul>
+          <li><code>@tagger</code></li>
+        </ul>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        See Sequencer.
+    </dd>
+</dl>
+</details>
+
+<details><summary>
+<code># Copyright: xxx</code>
+</summary>
+<dl>
+    <dt>Legacy purpose</dt>
+    <dd>
+        The game's copyright information.
+    </dd>
+    <dt>Should map to</dt>
+    <dd>
+        <ul>
+          <li><code>@copyright</code></li>
+        </ul>
+    </dd>
+    <dt>Rationale</dt>
+    <dd>
+        -
+    </dd>
+</dl>
+</details>
