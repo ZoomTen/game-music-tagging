@@ -328,6 +328,16 @@ Replaygain tags:
 </dl>
 </details>
 
+## Global commands
+
+* `$autotrack` - When specified, track numbers don't need to be specified manually.
+* `$autoalbum` - When specified, the directory name is taken as an album name.
+
+## Potential differences to vgmstream
+
+* Only tags without spaces should be supported.
+* TXTP files isn't necessary.
+
 ## `!tags.m3u` format proposal for sequenced foramts
 
 ### Tags
