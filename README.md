@@ -332,7 +332,7 @@ Replaygain tags:
 
 ### Tags
 * `album`
-* `company`
+* `publisher` / `company`
 * `artist`
 * `year`
 * `ripper`
@@ -340,7 +340,8 @@ Replaygain tags:
 * `source`
 * `title`
 * `subtune`
-* `length`
+  * Id of song within rip file
+* `length` 
 * `fade`
 
 ### Example
