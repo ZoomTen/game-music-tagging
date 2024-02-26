@@ -614,7 +614,7 @@ The resulting tag for it would be a combination of tags A and B, with tags B tak
 
 ## Proof of concepts
 
-Like this document, all of them are works in progress.
+Like this document, all of them are works in progress. They may not yet conform to this spec.
 
 * [Fork of NEZPlug++ Winamp plugin with !tags.m3u support](https://github.com/romh-acking/nezplug-m3u-tags)
 * [Fork of Audacious Console Music plugin with !tags.m3u support](https://github.com/ZoomTen/audacious-plugin-gme/tree/tags-m3u)
