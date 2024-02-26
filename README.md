@@ -349,6 +349,9 @@ These commands do not have a value.
   * Songs that don't loop should have a fade of 0:00:00.000.
 * `comment`
   * Notes or trivia concerning this track or the game rip.
+* `copyright`
+  * The applicable copyright string, its format similar to existing formats, e.g. `1995 Nintendo`.
+  * Supporting players can just insert this into their `Copyright` field.
 
 ### Mapping of legacy GME tags to !tags.m3u tags
 
@@ -363,7 +366,7 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-            <li><code>@album</code></li>
+            <li><code>album</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
@@ -384,8 +387,8 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@artist</code>, if no sound team information is available.</li>
-          <li><code>@company</code> / <code>@publisher</code></li>
+          <li><code>company</code></li>
+          <li><code>publisher</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
@@ -406,7 +409,8 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@date</code></li>
+          <li><code>year</code></li>
+          <li><code>date</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
@@ -427,8 +431,8 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@artist</code></li>
-          <li><code>@composer</code></li>
+          <li><code>artist</code></li>
+          <li><code>composer</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
@@ -448,7 +452,7 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@sequencer</code></li>
+          <li><code>sequencer</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
@@ -470,7 +474,7 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@engineer</code></li>
+          <li><code>engineer</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
@@ -489,7 +493,7 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@ripper</code></li>
+          <li><code>ripper</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
@@ -509,7 +513,7 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@tagger</code></li>
+          <li><code>tagger</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
@@ -528,7 +532,7 @@ These commands do not have a value.
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>@copyright</code></li>
+          <li><code>copyright</code></li>
         </ul>
     </dd>
     <dt>Rationale</dt>
