@@ -259,24 +259,25 @@ Replaygain tags:
 
 `!tags.m3u`
 ```python
-# @album	Das Geheimnis der Happy Hippo-Insel
-# @company	Kritzelkratz 3000, Infogrames
-# @artist	Stello Doussis
-# @year		2000-05-17
-# @ripper	DevEd
-# @tagger	DevEd
-# @source	CGB-BHOD-GER.gbs
+# @album     Das Geheimnis der Happy Hippo-Insel
+# @company   Kritzelkratz 3000
+# @publisher Infogrames
+# @artist    Stello Doussis
+# @year      2000
+# @date      2000-05-17
+# @ripper    DevEd
+# @tagger    DevEd
 
-# %title	Title Screen
-# %subtune	0
-# %length	0:02:03.000
-# %fade		0:00:10.000
-01 Title Screen.m3u
+# %track  1
+# %title  Title Screen
+# %length 0:02:03.000
+# %fade   0:00:10.000
+CGB-BHOD-GER.gbs?1
 ```
 
 `01 Title Screen.m3u`
 ```python
-01 Title Screen.m3u.gbs
+CGB-BHOD-GER.gbs?1
 ```
 
 ### General information
@@ -293,6 +294,67 @@ These commands do not have a value.
 
 * `$autotrack` - When specified, track numbers don't need to be specified manually.
 * `$autoalbum` - When specified, the directory name is taken as an album name.
+
+### File structure
+
+The rip should be a directory, compressed with 7z for distribution purposes. This directory shall consist of at least two files: the rip; and `!tags.m3u`.
+
+```
+Game (2024)(Publisher)[PCE].7z
+├─ Game (2024)(Publisher)[PCE].hes
+└─ !tags.m3u
+```
+
+Additionally, individual tracks may be split into one .m3u file each.
+
+```
+Game (2024)(Publisher)[PCE].7z
+├─ Game (2024)(Publisher)[PCE].hes
+├─ !tags.m3u
+├─ 01 Title Screen.m3u
+├─ 02 Options Menu.m3u
+└─ 03 Level Begin.m3u
+```
+
+`!tags.m3u` contains tags encoded as M3U comments, which means the lines containing them must begin with a hash/number symbol `#`. See [General information](#general-information) for more details.
+
+Non-comment lines must be a reference to a valid file, usually the rip inside the folder. When the rip contains subtunes, the file name must be suffixed with `?N`, where `N` is a **1-indexed** subtune number.
+
+Split M3U files should only contain the aforementioned non-comment lines. Comments in these files (including attempts at tag definitions) should be ignored as per usual.
+
+When a rip file is loaded by the player, the player will look for a `!tags.m3u` in the directory it's contained in. If not present, the player must fall back to default or tags already embedded in the file, however limited it is.
+
+When multiple rip files are referenced in `!tags.m3u`, e.g.
+
+```
+# ...tags A...
+A.nsf?1
+
+# ...tags B...
+B.nsf?3
+
+# ...tags C...
+A.nsf?2
+
+# ...tags D...
+A.nsf?4
+```
+
+If A.nsf is loaded, the player should only load tags A, C, and D. The resulting playlist would render subtune 3 lacking any tags.
+
+Likewise with B.nsf, where subtunes 1 and 2 will not have any tags.
+
+What if multiple tags are referenced for the same file and subsong?
+
+```
+# ...tags A...
+A.nsf?1
+
+# ...tags B...
+A.nsf?1
+```
+
+The resulting tag for it would be a combination of tags A and B, with tags B taking priority as it is defined after tags A.
 
 ### List of proposed tags
 
@@ -324,10 +386,8 @@ These commands do not have a value.
 * `engineer`
   * The engineer for either a single track (local tag) or assumed engineer for all tracks (global tag) unless specified otherwise. I assume this is the person who wrote the sound driver.
   * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
-* `year`
-  * Year of game's release, MUST be an integer in YYYY format.
 * `date`
-  * MUST be in YYYY-MM-DD format.
+  * Accepts only YYYY-MM-DD, YYYY-MM, or YYYY formats. The separating character MUST be a dash `-`.
   * Supporting players can just insert this into their `Date` field.
   * The year field can be extracted and put into the player's `Year` field. This goes for both players that support `Date` and otherwise.
 * `ripper`
