@@ -263,7 +263,6 @@ Replaygain tags:
 # @company   Kritzelkratz 3000
 # @publisher Infogrames
 # @artist    Stello Doussis
-# @year      2000
 # @date      2000-05-17
 # @ripper    DevEd
 # @tagger    DevEd
@@ -468,7 +467,6 @@ The resulting tag for it would be a combination of tags A and B, with tags B tak
     <dt>Should map to</dt>
     <dd>
         <ul>
-          <li><code>year</code></li>
           <li><code>date</code></li>
         </ul>
     </dd>
