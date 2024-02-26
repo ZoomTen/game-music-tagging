@@ -268,7 +268,6 @@ Replaygain tags:
 # @ripper    DevEd
 # @tagger    DevEd
 
-# %track  1
 # %title  Title Screen
 # %length 0:02:03.000
 # %fade   0:00:10.000
