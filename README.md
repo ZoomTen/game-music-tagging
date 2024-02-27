@@ -314,7 +314,7 @@ Game (2024)(Publisher)[PCE].7z
 └─ 03 Level Begin.m3u
 ```
 
-`!tags.m3u` contains tags encoded as M3U comments, which means the lines containing them must begin with a hash/number symbol `#`. See [General information](#general-information) for more details.
+`!tags.m3u` contains tags encoded as M3U comments, which means the lines containing them must begin with a hash/pound symbol `#`. See [General information](#general-information) for more details.
 
 Non-comment lines must be a reference to a valid file, usually the rip inside the folder. When the rip contains subtunes, the file name must be suffixed with `?N`, where `N` is a **1-indexed** subtune number.
 
