@@ -1,0 +1,42 @@
+## This !tags.m3u is formatted weirdly
+## in order to test how sloppy the library
+## can take it
+
+#@album Zumi's GB Music Engine v1
+#@company Zumi
+# @publisher none
+# @artist Unknown
+#@date  2015-10-09
+#@ripper Zumi
+#@tagger Zumi
+# @sequencer Zumi
+# @engineer Zumi
+#@fade 00:00:10.000
+
+# %title Ocean Loader 4
+# %composer Jonathan Dunn
+# %comment Just a short snippet.
+# %length 23
+# %fade 5
+gbstest.gbs?1
+
+# %title Super Pitfall - Overworld
+# %length 32
+	#	%comment Transcription of the NES version,
+	#%comment with extras from the PC-88 version.
+gbstest.gbs?2
+
+# %title Pokémon Red & Blue - Intro
+# %length 11
+#%composer Junichi Masuda
+#	%comment No noise, because I sucked
+gbstest.gbs?3
+
+# Multiple tags should append to each other… like
+# composer and comment
+
+# %title We Are the Crystal Gems
+# %length 54
+# %composer Rebecca Sugar
+# %composer Aivi & Surasshu
+gbstest.gbs?6
