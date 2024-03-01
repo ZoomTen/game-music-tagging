@@ -1,10 +1,11 @@
 project(
     'libgmtag',
-    'cpp',
+    ['c', 'cpp'],
     version: '0.1',
     default_options: [
         'warning_level=3',
-        'cpp_std=c++11'
+        'cpp_std=c++11',
+        'c_std=c99'
     ]
 )
 
@@ -13,7 +14,7 @@ libgmtag_sources = [
 ]
 
 test_sources = [
-    'src/test.cpp',
+    'src/test.c',
     libgmtag_sources
 ]
 

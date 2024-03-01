@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "libgmtag.hpp"
+#include "libgmtag.h"
 
 int main (void) {
     // let's put the entire thing in the buffer first
@@ -15,8 +15,7 @@ int main (void) {
 
     fclose(tags);
 
-    GmTags tag_obj = GmTags();
-    tag_obj.tags_from_buffer(tag_buf);
+    tags_from_buffer(tag_buf);
 
     printf("test\n");
 
