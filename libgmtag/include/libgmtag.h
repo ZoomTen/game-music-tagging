@@ -40,6 +40,7 @@ typedef struct gmtag_def {
 
 void tags_from_buffer (char *buff);
 GmTagDef get_tags_for_subtune (unsigned long subtune);
+void unset_tags (void);
 
 #ifdef __cplusplus
 }

@@ -60,5 +60,6 @@ int main (void) {
   }
 
   free(tag_buf);
+  unset_tags();
   return 0;
 }

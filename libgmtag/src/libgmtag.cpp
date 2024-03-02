@@ -1,7 +1,7 @@
 #include "libgmtag.h"
 
-#include <stdlib.h>
 #include <algorithm>
+#include <cstdlib>
 #include <vector>
 #include <map>
 #include <string>
@@ -182,6 +182,7 @@ void tags_from_buffer (char *buff) {
       break;
     buff_pointer = skip_current_line(buff_pointer);
   }
+  free(line_buffer);
 }
 
 GmTagDef get_tags_for_subtune (unsigned long subtune) {
@@ -190,6 +191,86 @@ GmTagDef get_tags_for_subtune (unsigned long subtune) {
   return default_tags;
 }
 
+void unset_tags () {
+  {  // unset default tags
+    if (default_tags.album) {
+      free(default_tags.album);
+    }
+    if (default_tags.company) {
+      free(default_tags.company);
+    }
+    if (default_tags.publisher) {
+      free(default_tags.publisher);
+    }
+    if (default_tags.artist) {
+      free(default_tags.artist);
+    }
+    if (default_tags.composer) {
+      free(default_tags.composer);
+    }
+    if (default_tags.sequencer) {
+      free(default_tags.sequencer);
+    }
+    if (default_tags.engineer) {
+      free(default_tags.engineer);
+    }
+    if (default_tags.ripper) {
+      free(default_tags.ripper);
+    }
+    if (default_tags.tagger) {
+      free(default_tags.tagger);
+    }
+    if (default_tags.title) {
+      free(default_tags.title);
+    }
+    if (default_tags.comments) {
+      free(default_tags.comments);
+    }
+    if (default_tags.copyright) {
+      free(default_tags.copyright);
+    }
+  }
+  {  // then unset unique tags
+    for (auto tag : tags) {
+      if (tag.second.album != default_tags.album) {
+        free(tag.second.album);
+      }
+      if (tag.second.company != default_tags.company) {
+        free(tag.second.company);
+      }
+      if (tag.second.publisher != default_tags.publisher) {
+        free(tag.second.publisher);
+      }
+      if (tag.second.artist != default_tags.artist) {
+        free(tag.second.artist);
+      }
+      if (tag.second.composer != default_tags.composer) {
+        free(tag.second.composer);
+      }
+      if (tag.second.sequencer != default_tags.sequencer) {
+        free(tag.second.sequencer);
+      }
+      if (tag.second.engineer != default_tags.engineer) {
+        free(tag.second.engineer);
+      }
+      if (tag.second.ripper != default_tags.ripper) {
+        free(tag.second.ripper);
+      }
+      if (tag.second.tagger != default_tags.tagger) {
+        free(tag.second.tagger);
+      }
+      if (tag.second.title != default_tags.title) {
+        free(tag.second.title);
+      }
+      if (tag.second.comments != default_tags.comments) {
+        free(tag.second.comments);
+      }
+      if (tag.second.copyright != default_tags.copyright) {
+        free(tag.second.copyright);
+      }
+    }
+  }
+}
 // skip spaces and newlines
 char *skip_spaces (char *i) {
   while ((*i == ' ') || (*i == '\t') || (*i == '\n') ||
@@ -242,6 +323,9 @@ char *into_buffer_until_newline (
 
 static char *set_album (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.album != nullptr) {
+    free(tag.album);
+  }
   tag.album = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -252,6 +336,9 @@ static char *set_album (GmTagDef &tag, char *buffer) {
 
 static char *set_title (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.title != nullptr) {
+    free(tag.title);
+  }
   tag.title = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -262,6 +349,9 @@ static char *set_title (GmTagDef &tag, char *buffer) {
 
 static char *set_composer (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.composer != nullptr) {
+    free(tag.composer);
+  }
   tag.composer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -272,6 +362,9 @@ static char *set_composer (GmTagDef &tag, char *buffer) {
 
 static char *set_company (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.company != nullptr) {
+    free(tag.company);
+  }
   tag.company = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -282,6 +375,9 @@ static char *set_company (GmTagDef &tag, char *buffer) {
 
 static char *set_publisher (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.publisher != nullptr) {
+    free(tag.publisher);
+  }
   tag.publisher = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -292,6 +388,9 @@ static char *set_publisher (GmTagDef &tag, char *buffer) {
 
 static char *set_artist (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.artist != nullptr) {
+    free(tag.artist);
+  }
   tag.artist = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -302,6 +401,9 @@ static char *set_artist (GmTagDef &tag, char *buffer) {
 
 static char *set_sequencer (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.sequencer != nullptr) {
+    free(tag.sequencer);
+  }
   tag.sequencer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -312,6 +414,9 @@ static char *set_sequencer (GmTagDef &tag, char *buffer) {
 
 static char *set_engineer (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.engineer != nullptr) {
+    free(tag.engineer);
+  }
   tag.engineer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -376,6 +481,9 @@ do_parse_date:
 
 static char *set_ripper (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.ripper != nullptr) {
+    free(tag.ripper);
+  }
   tag.ripper = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -386,6 +494,9 @@ static char *set_ripper (GmTagDef &tag, char *buffer) {
 
 static char *set_tagger (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.tagger != nullptr) {
+    free(tag.tagger);
+  }
   tag.tagger = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
