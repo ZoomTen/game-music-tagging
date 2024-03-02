@@ -507,6 +507,22 @@ static char *set_fade (GmTagDef &tag, char *buffer) {
 
 static char *set_comment (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
+  if (tag.comments) {
+    // append to existing
+    size_t i = 0;
+    char *cmttag = tag.comments;
+    // find end of comment field
+    while (*cmttag++ != '\0') {
+      i++;
+    }
+    cmttag--;
+    *cmttag++ = '\n';
+    return into_buffer_until_newline(
+        buffer,
+        cmttag,
+        MAX_FIELD_LENGTH - i
+    );
+  }
   tag.comments = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
