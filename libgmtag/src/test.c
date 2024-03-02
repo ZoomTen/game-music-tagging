@@ -10,7 +10,9 @@ int main (void) {
   fseek(tags, 0, SEEK_END);
   size_t tag_buf_size = (size_t)ftell(tags);
 
-  char *tag_buf = (char *)malloc(tag_buf_size);
+  char *tag_buf = (char *)malloc(tag_buf_size + 1);
+  tag_buf[tag_buf_size] = '\0';
+
   fseek(tags, 0, SEEK_SET);
   fread(tag_buf, 1, tag_buf_size, tags);
 
