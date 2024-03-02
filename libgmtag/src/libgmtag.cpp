@@ -1,6 +1,7 @@
 #include "libgmtag.h"
 
 #include <stdlib.h>
+#include <algorithm>
 #include <vector>
 #include <map>
 #include <string>
@@ -93,6 +94,16 @@ void tags_from_buffer (char *buff) {
               word_into_buffer(buff_pointer, line_buffer, 255);
 
           word = std::string(line_buffer);
+
+          // normalize case
+          // https://stackoverflow.com/a/313990
+          std::transform(
+              word.begin(),
+              word.end(),
+              word.begin(),
+              [] (unsigned char c) { return std::tolower(c); }
+          );
+
           if (tag_handlers.count(word)) {
             buff_pointer =
                 tag_handlers[word](current_tag, buff_pointer);
