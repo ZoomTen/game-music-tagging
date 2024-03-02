@@ -439,6 +439,11 @@ A.nsf?1
   * The track number to manually assign to this track.
   * Normally, this isn't needed as it is set automatically based on the order defined in `!tags.m3u`.
 
+**Notes**:
+
+* When defined multiple times for a track, local tags *excluding* `comment` should overwrite the previous definition.
+* When multiple entities are involved in one quality of the soundtrack, e.g. more than one composer should be listed in a `composer` field, all entities must be listed as that tag's value in one line, with a comma and a space `, ` separating each value.
+
 ### Time format
 
 One of:
