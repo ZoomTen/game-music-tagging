@@ -1,4 +1,4 @@
-# Proposal for a new tags format for retro soundtrack rips
+# Proposal for a new tags format for sequenced game music rips
 
 This document is a proposal to adapt vgmstream's `!tags.m3u` format to older sequenced formats to better standardize sound rips.
 
@@ -13,6 +13,8 @@ One solution to this problem was M3U tagging. A fine solution until you see the 
 `!tags.m3u` is a format from the [vgmstream](https://github.com/vgmstream/vgmstream/blob/master/doc/USAGE.md#tagging) library, the definitive streamed music library. There's a plethora of streamed formats so most stream rips resort to `!tags.m3u` and `.txtp` for extra metadata for all streamed formats. `!tags.m3u` is a static filename that is located at the base of the rip and contains metadata for all the rips in one file.
 
 (Original post: https://github.com/libgme/game-music-emu/issues/85)
+
+> vgmstream's internals are tailored to play streams so, in other words, it's not possible to add support for sequenced audio unless massive changes were done, basically becoming another program entirely. There are other projects better suited for playing sequences.
 
 ## Existing extended tagging formats
 
@@ -184,9 +186,9 @@ Notes:
 
 GME sidecar formats take on the same name as the file it's meant for; e.g. `Pictionary (1990-07)(Software Creations)(LJN).m3u` is read for `Pictionary (1990-07)(Software Creation)(LJN).nsf`.
 
-### Knurek / HCS64
+### "Knurek / HCS64" format
 
-(the rip on HCS at the time of writing doesn't follow this format…)
+(the Pictionary rip on HCS itself at the time of writing doesn't follow this format…)
 
 ```python
 # @TITLE     Pictionary
@@ -202,7 +204,7 @@ Pictionary.nsf::NSF,1,Title Screen,1:34,-,10,
 # .. more entries here
 ```
 
-### not sure what this one's "called"
+### "GME" format
 
 ```python
 # Game:      Pictionary
@@ -267,9 +269,9 @@ Replaygain tags:
 # @ripper    DevEd
 # @tagger    DevEd
 
-# %title  Title Screen
-# %length 0:02:03.000
-# %fade   0:00:10.000
+# %title     Title Screen
+# %length    0:02:03.000
+# %fade      0:00:10.000
 CGB-BHOD-GER.gbs?1
 ```
 
@@ -278,11 +280,33 @@ CGB-BHOD-GER.gbs?1
 CGB-BHOD-GER.gbs?1
 ```
 
+### Definitions
+
+<dl>
+<dt>Player</dt>
+<dd>
+A media player with support for playing sequenced
+rips, either built-in or through an extension.
+</dd>
+<dt>Player field</dt>
+<dd>
+An information field that a player shows in its UI
+or injected when exporting from it, e.g. as ID3 tags
+in an MP3.
+</dd>
+<dt>Tag</dt>
+<dd>
+Key:value information defined inside
+<code>!tags.m3u</code> that describes a particular
+quality of the sequenced rip.
+</dd>
+</dl>
+
 ### General information
 
-All tags follow the same rules as in the vgmstream specification, with the general tag format being: `# <Sigil><Tag> <Value>`. Or, in terms of [cryptic regex-runes](https://regex101.com/): `#\s*([\$@%])(\w+)\s+(.+)$|#\s*\$(\w+)\s*$`. The sigils are:
+All tags follow the same rules as in the vgmstream specification (including case-insensitivity), with the general tag format being: `# <Sigil><Tag> <Value>`. Or, in terms of [cryptic regex-runes](https://regex101.com/): `#\s*([\$@%])(\w+)\s+(.+)$|#\s*\$(\w+)\s*$`. The sigils are:
 
-* `$` - representing a global command, see below.
+* `$` - representing a [global command](#global-commands).
 * `@` - representing a global tag, which applies to all tracks, unless overridden by a local tag.
 * `%` - representing a local tag, which applies to the track directly underneath the containing comment block.
 
@@ -290,7 +314,6 @@ All tags follow the same rules as in the vgmstream specification, with the gener
 
 These commands do not have a value.
 
-* `$autotrack` - When specified, track numbers don't need to be specified manually.
 * `$autoalbum` - When specified, the directory name is taken as an album name.
 
 ### File structure
@@ -314,17 +337,21 @@ Game (2024)(Publisher)[PCE].7z
 └─ 03 Level Begin.m3u
 ```
 
-`!tags.m3u` contains tags encoded as M3U comments, which means the lines containing them must begin with a hash/pound symbol `#`. See [General information](#general-information) for more details.
+### File format information
+
+`!tags.m3u` is a standard M3U playlist. It is plain text that should either be encoded as ANSI or UTF-8, and should support all types of line breaks.
+
+It contains "tags" encoded as M3U comments, each defined as a line beginning with a hash/pound symbol `#`. See [General information](#general-information) for more details.
 
 Non-comment lines must be a reference to a valid file, usually the rip inside the folder. When the rip contains subtunes, the file name must be suffixed with `?N`, where `N` is a **1-indexed** subtune number.
 
-Split M3U files should only contain the aforementioned non-comment lines. Comments in these files (including attempts at tag definitions) should be ignored as per usual.
+Split M3U files should only contain the aforementioned non-comment lines. Tags in these files are ignored, as `!tags.m3u` is considered the only source of truth.
 
 When a rip file is loaded by the player, the player will look for a `!tags.m3u` in the directory it's contained in. If not present, the player must fall back to default or tags already embedded in the file, however limited it is.
 
 When multiple rip files are referenced in `!tags.m3u`, e.g.
 
-```
+```python
 # ...tags A...
 A.nsf?1
 
@@ -342,9 +369,9 @@ If A.nsf is loaded, the player should only load tags A, C, and D. The resulting 
 
 Likewise with B.nsf, where subtunes 1 and 2 will not have any tags.
 
-What if multiple tags are referenced for the same file and subsong?
+If multiple tags are referenced for the same file and subsong:
 
-```
+```python
 # ...tags A...
 A.nsf?1
 
@@ -352,7 +379,7 @@ A.nsf?1
 A.nsf?1
 ```
 
-The resulting tag for it would be a combination of tags A and B, with tags B taking priority as it is defined after tags A.
+…the resulting tag for it would be a combination of tags A and B, with tags B taking priority as it is defined after tags A.
 
 ### List of proposed tags
 
@@ -396,15 +423,47 @@ The resulting tag for it would be a combination of tags A and B, with tags B tak
   * The title of the track. This should be its composer given name, or if unavailable, the part of the game it plays on. Consider: https://www.youtube.com/watch?v=AbBpQTkTFF4
   * Supporting players can insert this into their `Title` field.
 * `length`
-  * Length of song before the loop, MUST be in H:MM:SS.MMM format.
+  * Length of song before the loop.
+  * See [Time format](#time-format) for allowed values. 
 * `fade`
-  * How long to fade out the song after the last loop, in H:MM:SS.MMM format.
+  * How long to fade out the song after the last loop.
+  * See [Time format](#time-format) for allowed values. 
   * Songs that don't loop should have a fade of 0:00:00.000.
 * `comment`
   * Notes or trivia concerning this track or the game rip.
+  * Can be defined more than once; subsequent definitions will be appended to (with a newline joining each definition) e.g. `#%comment Hello` and `#%comment World` will result in `Hello\nWorld`.
 * `copyright`
   * The applicable copyright string, its format similar to existing formats, e.g. `1995 Nintendo`.
   * Supporting players can just insert this into their `Copyright` field.
+* `track`
+  * The track number to manually assign to this track.
+  * Normally, this isn't needed as it is set automatically based on the order defined in `!tags.m3u`.
+
+### Time format
+
+One of:
+
+* SS
+  * e.g. `30`
+* SS.mmm
+  * e.g. `17.104`
+* MM:SS
+  * e.g. `6:05`
+* MM:SS.mmm
+  * e.g. `4:07.04`
+* HH:MM:SS
+  * e.g. `1:02:00`
+* HH:MM:SS.mmm
+  * e.g. `00:47:16.140`
+
+Where:
+
+* **HH** = hours
+* **MM** = minutes
+* **SS** = seconds
+* **mmm** = miliseconds
+
+Each part may be zero-padded, or not.
 
 ### Mapping of legacy GME tags to !tags.m3u tags
 
@@ -593,10 +652,12 @@ The resulting tag for it would be a combination of tags A and B, with tags B tak
     </dd>
 </dl>
 
-### Potential differences to vgmstream
+### Differences to vgmstream
 
-* Only tags without spaces should be supported.
-* TXTP files isn't necessary.
+* Only tags without spaces is to be supported.
+* As sequenced rips are usually self-contained, TXTP files aren't necessary—in its place are separate m3u files for each track.
+* `autotrack` is implicitly assumed; the `track` tag can be used to manually assign track numbers if necessary.
+* The tags are standardized, so it doesn't assume a certain player is to be used. Players implementing this should instead adapt tags defined here to player fields themselves as appropriate.
 
 ### Additional considerations
 
@@ -606,6 +667,8 @@ The resulting tag for it would be a combination of tags A and B, with tags B tak
 * vgmstream's design seems to be intentionally player-specific.
   * **Pro**: there little parsing work to be done, the design kept relatively simple
   * **Con**: a risk of redundant data being entered when a player supports more granular fields (like `Composer` and `Date`), while players with less granular fields (like `Artist` and `Year`) is to also be supported. Either go with the lowest-common denominator, or input redundant data. Can be automated somewhat, but overall a hassle.
+* The M3U entries should be made as compatible as possible for existing players, and ideally both `!tags.m3u` and the rip itself should provide the same outcome: proper tags and track separation.
+* Encoding loop start/length information may not be necessary; the player should provide an option to play tracks endlessly instead.
 
 ## Proof of concepts
 
