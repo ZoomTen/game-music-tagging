@@ -16,27 +16,26 @@
 # %title Ocean Loader 4
 # %composer Jonathan Dunn
 # %comment Just a short snippet.
-# %length 23
+# %length 0:23
 # %fade 5
+
 gbstest.gbs?1
 
 # %title Super Pitfall - Overworld
-# %length 32
+# %length 32.000
 	#	%comment Transcription of the NES version,
 	#%comment with extras from the PC-88 version.
 gbstest.gbs?2
 
 # %title Pokémon Red & Blue - Intro
-# %length 11
+# %length 00:11.000
 #%composer Junichi Masuda
 #	%comment No noise, because I sucked
+
+
 gbstest.gbs?3
 
-# Multiple tags should append to each other… like
-# composer and comment
-
 # %title We Are the Crystal Gems
-# %length 54
-# %composer Rebecca Sugar
-# %composer Aivi & Surasshu
+# %length 0:00:54.000
+# %composer Rebecca Sugar, Aivi & Surasshu
 gbstest.gbs?6
