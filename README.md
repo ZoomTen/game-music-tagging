@@ -392,14 +392,9 @@ The resulting tag for it would be a combination of tags A and B, with tags B tak
   * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
 * `tagger`
   * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
-* `source`
-  * Link to the game rip file.
 * `title`
   * The title of the track. This should be its composer given name, or if unavailable, the part of the game it plays on. Consider: https://www.youtube.com/watch?v=AbBpQTkTFF4
   * Supporting players can insert this into their `Title` field.
-* `subtune`
-  * ID of song within the game rip file, should be **0-indexed**.
-  * Supporting players can insert this into their `Track Number` field, incrementing it by 1 in the process.
 * `length`
   * Length of song before the loop, MUST be in H:MM:SS.MMM format.
 * `fade`
