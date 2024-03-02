@@ -17,6 +17,7 @@ static bool tag_handlers_init = false;
 
 // "global" tags
 static GmTagDef default_tags = {};
+static uint64_t track_num = 1;
 
 // every field has a maximum length of:
 #define MAX_FIELD_LENGTH 256
@@ -26,9 +27,10 @@ static char *skip_spaces (char *);
 static char *skip_current_line (char *);
 static char *word_into_buffer (char *, char *, size_t);
 static char *into_buffer_until_newline (char *, char *, size_t);
-inline bool is_number (char i);
+static inline bool is_number (char i);
 
 // handlers
+static char *set_track (GmTagDef &, char *);
 static char *set_album (GmTagDef &, char *);
 static char *set_company (GmTagDef &, char *);
 static char *set_publisher (GmTagDef &, char *);
@@ -50,6 +52,7 @@ void tags_from_buffer (char *buff) {
   char *buff_pointer = buff;
 
   if (!tag_handlers_init) {
+    tag_handlers["track"] = set_track;
     tag_handlers["album"] = set_album;
     tag_handlers["company"] = set_company;
     tag_handlers["publisher"] = set_publisher;
@@ -189,9 +192,18 @@ void tags_from_buffer (char *buff) {
             // if (current_tag.length) prev_tag.length =
             // current_tag.length; if (current_tag.fade)
             // prev_tag.fade = current_tag.fade;
+            if (current_tag.track)
+              prev_tag.track = current_tag.track;
+
+            if (prev_tag.track == 0)
+              prev_tag.track = track_num++;
+
             tags[subtune_num] = prev_tag;
           } else {
             // otherwise, just add it
+            if (current_tag.track == 0)
+              current_tag.track = track_num++;
+
             tags[subtune_num] = current_tag;
           }
 
@@ -686,4 +698,18 @@ static char *set_copyright (GmTagDef &tag, char *buffer) {
       tag.copyright,
       MAX_FIELD_LENGTH
   );
+}
+
+static char *set_track (GmTagDef &tag, char *buffer) {
+  buffer = skip_spaces(buffer);
+  std::string tmp;
+  char cur_char = *buffer++;
+  while (is_number(cur_char)) {
+    tmp.push_back(cur_char);
+    cur_char = *buffer++;
+  }
+  if (tmp.length() > 0) {
+    tag.track = std::stoul(tmp);
+  }
+  return --buffer;
 }

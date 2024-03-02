@@ -21,6 +21,7 @@
 
 gbstest.gbs?1
 
+#   %track 12
 # %title Super Pitfall - Overworld
 # %length 32.000
 	#	%comment Transcription of the NES version,

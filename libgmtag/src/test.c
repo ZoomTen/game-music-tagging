@@ -24,6 +24,7 @@ int main (void) {
     GmTagDef tag = get_tags_for_subtune(i);
     printf("\n---- subtune %d ----\n", (int)i);
     printf(
+        "Track#:    %d\n"
         "Album:     %s\n"
         "Company:   %s\n"
         "Publisher: %s\n"
@@ -39,6 +40,7 @@ int main (void) {
         "Copyright: %s\n"
         "Length:    %03lu.%03lu\n"
         "Fade:      %03lu.%03lu\n",
+        tag.track,
         tag.album,
         tag.company,
         tag.publisher,

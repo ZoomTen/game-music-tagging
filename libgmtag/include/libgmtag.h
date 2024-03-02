@@ -21,6 +21,7 @@ typedef struct gmtag_datedef {
 } GmTagDateDef;
 
 typedef struct gmtag_def {
+  uint64_t track;
   char *album;
   char *company;
   char *publisher;
