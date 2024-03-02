@@ -75,128 +75,132 @@ void tags_from_buffer (char *buff) {
   char current_sigil;
   char last_sigil;
 
-  while (true) {
+  // while not EOF
+  while (*buff_pointer != '\0') {
     // I assume every iteration starts at the
     // beginning of the line
     buff_pointer = skip_spaces(buff_pointer);
+    std::string word;
 
-    if (*buff_pointer == '#') {
-      // this is an m3u comment. does it contain tags or not?
-      buff_pointer++;
-
-      buff_pointer = skip_spaces(buff_pointer);
-      std::string word;
-
-      switch (current_sigil = *buff_pointer++) {
-        case '@':  // global tag
-        case '%':  // local tag
-          if ((current_sigil == '%') && (last_sigil == '@')) {
-            // assume this is where the group of
-            // "global" tags end and where the
-            // "local" tags start, so save the "global"
-            // tags up to this point.
-            default_tags = current_tag;
-          }
-
-          buff_pointer = word_into_buffer(
-              buff_pointer,
-              keyword,
-              MAX_FIELD_LENGTH - 1
-          );
-
-          word = std::string(keyword);
-
-          // normalize case: https://stackoverflow.com/a/313990
-          std::transform(
-              word.begin(),
-              word.end(),
-              word.begin(),
-              [] (unsigned char c) { return std::tolower(c); }
-          );
-
-          if (tag_handlers.count(word)) {
-            buff_pointer =
-                tag_handlers[word](current_tag, buff_pointer);
-          }
-          break;
-        default:
-          break;
-      }
-
-      last_sigil = current_sigil;
-    } else {
-      // this must be an m3u entry, attempt to parse it
-      bool next_is_subtune_number = false;
-      std::string subtune_number_str = "";
-
-      while ((*buff_pointer != '\0') &&
-             (*buff_pointer != '\n') &&
-             (*buff_pointer != '\r')) {
-        if (*buff_pointer == '?') {
-          // in case we have titles like:
-          // "Where the HELL is Carmen Sandiego???.nsf?4"
-          char next_is = *(buff_pointer + 1);
-          next_is_subtune_number = is_number(next_is);
-        } else if (next_is_subtune_number) {
-          subtune_number_str.push_back(*buff_pointer);
-        }
+    switch (*buff_pointer) {
+      case '#':
+        // this is an m3u comment. does it contain tags or not?
         buff_pointer++;
-      }
+        buff_pointer = skip_spaces(buff_pointer);
 
-      if (subtune_number_str.length() > 0) {
-        // we got a subtune number, let's push the
-        // current tags into the list
-        uint64_t subtune_num = std::stoul(subtune_number_str);
+        switch (current_sigil = *buff_pointer++) {
+          case '@':  // global tag
+          case '%':  // local tag
+            if ((current_sigil == '%') && (last_sigil == '@')) {
+              // assume this is where the group of
+              // "global" tags end and where the
+              // "local" tags start, so save the "global"
+              // tags up to this point.
+              default_tags = current_tag;
+            }
 
-        if (tags.count(subtune_num)) {
-          // if a subtune exists, modify its properties
-          GmTagDef prev_tag = tags[subtune_num];
+            buff_pointer = word_into_buffer(
+                buff_pointer,
+                keyword,
+                MAX_FIELD_LENGTH - 1
+            );
 
-          if (current_tag.album)
-            prev_tag.album = current_tag.album;
-          if (current_tag.company)
-            prev_tag.company = current_tag.company;
-          if (current_tag.publisher)
-            prev_tag.publisher = current_tag.publisher;
-          if (current_tag.artist)
-            prev_tag.artist = current_tag.artist;
-          if (current_tag.composer)
-            prev_tag.composer = current_tag.composer;
-          if (current_tag.sequencer)
-            prev_tag.sequencer = current_tag.sequencer;
-          if (current_tag.engineer)
-            prev_tag.engineer = current_tag.engineer;
-          // if (current_tag.date) prev_tag.date =
-          // current_tag.date;
-          if (current_tag.ripper)
-            prev_tag.ripper = current_tag.ripper;
-          if (current_tag.tagger)
-            prev_tag.tagger = current_tag.tagger;
-          if (current_tag.title)
-            prev_tag.title = current_tag.title;
-          if (current_tag.comments)
-            prev_tag.comments = current_tag.comments;
-          if (current_tag.copyright)
-            prev_tag.copyright = current_tag.copyright;
-          // if (current_tag.length) prev_tag.length =
-          // current_tag.length; if (current_tag.fade)
-          // prev_tag.fade = current_tag.fade;
-          tags[subtune_num] = prev_tag;
-        } else {
-          // otherwise, just add it
-          tags[subtune_num] = current_tag;
+            word = std::string(keyword);
+
+            // normalize case: https://stackoverflow.com/a/313990
+            std::transform(
+                word.begin(),
+                word.end(),
+                word.begin(),
+                [] (unsigned char c) { return std::tolower(c); }
+            );
+
+            if (tag_handlers.count(word)) {
+              buff_pointer =
+                  tag_handlers[word](current_tag, buff_pointer);
+            }
+            break;
+          default:
+            break;
         }
 
-        // create new tag
-        current_tag = default_tags;
-      }
+        last_sigil = current_sigil;
+        buff_pointer = skip_current_line(buff_pointer);
+        break;
+      case '\n':
+      case '\r':
+        buff_pointer = skip_current_line(buff_pointer);
+        break;
+      default:
+        // this must be an m3u entry, attempt to parse it
+        bool next_is_subtune_number = false;
+        std::string subtune_number_str = "";
+
+        while ((*buff_pointer != '\0') &&
+               (*buff_pointer != '\n') &&
+               (*buff_pointer != '\r'))
+        {
+          if (*buff_pointer == '?') {
+            // in case we have titles like:
+            // "Where the HELL is Carmen Sandiego???.nsf?4"
+            char next_is = *(buff_pointer + 1);
+            next_is_subtune_number = is_number(next_is);
+          } else if (next_is_subtune_number) {
+            subtune_number_str.push_back(*buff_pointer);
+          }
+          buff_pointer++;
+        }
+
+        if (subtune_number_str.length() > 0) {
+          // we got a subtune number, let's push the
+          // current tags into the list
+          uint64_t subtune_num = std::stoul(subtune_number_str);
+
+          if (tags.count(subtune_num)) {
+            // if a subtune exists, modify its properties
+            GmTagDef prev_tag = tags[subtune_num];
+
+            if (current_tag.album)
+              prev_tag.album = current_tag.album;
+            if (current_tag.company)
+              prev_tag.company = current_tag.company;
+            if (current_tag.publisher)
+              prev_tag.publisher = current_tag.publisher;
+            if (current_tag.artist)
+              prev_tag.artist = current_tag.artist;
+            if (current_tag.composer)
+              prev_tag.composer = current_tag.composer;
+            if (current_tag.sequencer)
+              prev_tag.sequencer = current_tag.sequencer;
+            if (current_tag.engineer)
+              prev_tag.engineer = current_tag.engineer;
+            // if (current_tag.date) prev_tag.date =
+            // current_tag.date;
+            if (current_tag.ripper)
+              prev_tag.ripper = current_tag.ripper;
+            if (current_tag.tagger)
+              prev_tag.tagger = current_tag.tagger;
+            if (current_tag.title)
+              prev_tag.title = current_tag.title;
+            if (current_tag.comments)
+              prev_tag.comments = current_tag.comments;
+            if (current_tag.copyright)
+              prev_tag.copyright = current_tag.copyright;
+            // if (current_tag.length) prev_tag.length =
+            // current_tag.length; if (current_tag.fade)
+            // prev_tag.fade = current_tag.fade;
+            tags[subtune_num] = prev_tag;
+          } else {
+            // otherwise, just add it
+            tags[subtune_num] = current_tag;
+          }
+
+          // create new tag
+          current_tag = default_tags;
+          buff_pointer = skip_current_line(buff_pointer);
+        }
+        break;
     }
-
-    // end of file
-    if (*buff_pointer == '\0')
-      break;
-
-    buff_pointer = skip_current_line(buff_pointer);
   }
 
   free(keyword);
@@ -293,10 +297,9 @@ inline bool is_number (char i) {
   return ((i >= '0') && (i <= '9'));
 }
 
-// skip spaces and newlines
+// skip spaces
 char *skip_spaces (char *i) {
-  while ((*i == ' ') || (*i == '\t') || (*i == '\n') ||
-         (*i == '\r')) {
+  while ((*i == ' ') || (*i == '\t')) {
     i++;
   }
   return i;
@@ -304,9 +307,14 @@ char *skip_spaces (char *i) {
 
 char *skip_current_line (char *i) {
   // assumes windows/unix line endings!
-  while ((*i != '\r') && (*i != '\n')) {
+  while ((*i != '\r') && (*i != '\n') && (*i != '\0')) {
     i++;
   }
+  if (*i == '\0') {
+    // if EOF, just return the end addr
+    return i;
+  }
+  // otherwise, it's the next line
   return ++i;
 }
 
@@ -314,7 +322,8 @@ char *
 word_into_buffer (char *source, char *buffer, size_t max_size) {
   size_t i = 0;
   while ((*source != ' ') && (*source != '\t') &&
-         (*source != '\r') && (*source != '\n')) {
+         (*source != '\r') && (*source != '\n'))
+  {
     if (++i == max_size) {
       break;
     }
@@ -469,7 +478,8 @@ static char *set_date (GmTagDef &tag, char *buffer) {
   }
 
   if ((cur_char != '-') || (month.length() < 1) ||
-      (month.length() > 2)) {
+      (month.length() > 2))
+  {
     goto do_parse_date;
   }
 
