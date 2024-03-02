@@ -535,11 +535,12 @@ static char *set_tagger (GmTagDef &tag, char *buffer) {
 }
 
 static char *str_to_time (char *buffer, GmTagTimeDef &time) {
-  std::string tmp = "";
-  std::vector<time_t> test;
+  // in case this was called with uninit'd &time
+  time.seconds = 0;
+  time.miliseconds = 0;
 
-  // ↓
-  // 00:00:49.000
+  std::string tmp = "";
+  std::vector<time_t> tmp_stack;
 
   char cur_char = *buffer++;
   while (is_number(cur_char)) {
@@ -548,11 +549,11 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
   }
 
   if (cur_char == '.') {
-    // must be 420.69
+    // must be 420.690
     // so the buffer right now must be seconds
     time.seconds = std::stol(tmp);
 
-    // so process just the miliseconds part
+    // then process just the miliseconds part
     tmp = "";
     cur_char = *(++buffer);
     while (is_number(cur_char)) {
@@ -561,6 +562,7 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
     }
     time.miliseconds = std::stol(tmp);
     return --buffer;
+
   } else if (cur_char != ':') {
     // must be 420
     time.seconds = std::stol(tmp);
@@ -568,9 +570,9 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
   }
 
   // save the number for now
-  // because I don't know if it's 00:07:00.00
-  // or if it's 07:00.00, or if it's 07:00, or if it's 00:07:00
-  test.push_back(std::stol(tmp));
+  // because I don't know if it's 00:07:00.690
+  // or if it's 07:00.690 or what…
+  tmp_stack.push_back(std::stol(tmp));
   tmp = "";
 
   cur_char = *buffer++;
@@ -578,16 +580,17 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
     tmp.push_back(cur_char);
     cur_char = *buffer++;
   }
+
   if (cur_char != ':') {
-    // must be 07:00.00 or 07:00
-    time.seconds = test.back() * 60;
+    // must be 07:00.690 or 07:00
+    time.seconds = tmp_stack.back() * 60;
     time.seconds += std::stol(tmp);
 
-    if (cur_char != '.') {
-      // 07:00
+    if (cur_char != '.') {  // 07:00
       return --buffer;
     }
-    // 07:00.00
+
+    // 07:00.690
     tmp = "";
     cur_char = *(++buffer);
     while (is_number(cur_char)) {
@@ -597,8 +600,9 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
     time.miliseconds = std::stol(tmp);
     return --buffer;
   }
-  // 00:07:00 or 00:07:00.00
-  test.push_back(std::stol(tmp));
+
+  // this leaves us with 00:07:00 or 00:07:00.690
+  tmp_stack.push_back(std::stol(tmp));
   tmp = "";
 
   cur_char = *buffer++;
@@ -606,19 +610,21 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
     tmp.push_back(cur_char);
     cur_char = *buffer++;
   }
-  // must be 00:07:00.00 or 00:07:00
+
   // minutes
-  time.seconds = test.back() * 60;
-  test.pop_back();
+  time.seconds = tmp_stack.back() * 60;
+  tmp_stack.pop_back();
+
   // hours
-  time.seconds = test.back() * 60 * 60;
+  time.seconds = tmp_stack.back() * 60 * 60;
   time.seconds += std::stol(tmp);
 
   if (cur_char != '.') {
     // 00:07:00
     return --buffer;
   }
-  // 00:07:00.00
+
+  // 00:07:00.690
   tmp = "";
   cur_char = *(++buffer);
   while (is_number(cur_char)) {
@@ -626,6 +632,7 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
     cur_char = *buffer++;
   }
   time.miliseconds = std::stol(tmp);
+
   return --buffer;
 }
 
