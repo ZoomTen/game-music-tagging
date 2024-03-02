@@ -16,6 +16,8 @@ typedef struct gmtag_datedef {
   uint64_t year;
   uint8_t month;
   uint8_t day;
+
+  uint8_t padding[6];
 } GmTagDateDef;
 
 typedef struct gmtag_def {
@@ -29,7 +31,6 @@ typedef struct gmtag_def {
   GmTagDateDef date;
   char *ripper;
   char *tagger;
-  char *source;
   char *title;
   char *comments;
   char *copyright;
@@ -38,7 +39,7 @@ typedef struct gmtag_def {
 } GmTagDef;
 
 void tags_from_buffer (char *buff);
-GmTagDef get_tags_for_subtune (int subtune);
+GmTagDef get_tags_for_subtune (unsigned long subtune);
 
 #ifdef __cplusplus
 }

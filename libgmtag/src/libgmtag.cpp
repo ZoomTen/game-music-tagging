@@ -1,6 +1,7 @@
 #include "libgmtag.h"
 
 #include <stdlib.h>
+#include <vector>
 #include <map>
 #include <string>
 
@@ -69,7 +70,7 @@ void tags_from_buffer (char *buff) {
   char current_sigil;
   char last_sigil;
 
-  while (1) {
+  while (true) {
     buff_pointer = skip_spaces(buff_pointer);
     if (*buff_pointer == '#') {
       // the meta is stored inside m3u comments
@@ -106,16 +107,16 @@ void tags_from_buffer (char *buff) {
       // must be an m3u entry, attempt to parse it
       bool next_is_subtune_number = false;
       std::string subtune_number_str = "";
-      while ((*buff_pointer != '\n') && (*buff_pointer != '\r'))
+      while ((*buff_pointer != '\0') &&
+             (*buff_pointer != '\n') && (*buff_pointer != '\r'))
       {
         if (*buff_pointer == '?') {
           // in case we have titles like:
           // "Where the HELL is Carmen
           // Sandiego???.nsf?4"
           char next_is = *(buff_pointer + 1);
-          if ((next_is >= '0') && (next_is <= '9')) {
-            next_is_subtune_number = true;
-          }
+          next_is_subtune_number =
+              ((next_is >= '0') && (next_is <= '9'));
         } else if (next_is_subtune_number) {
           subtune_number_str.push_back(*buff_pointer);
         }
@@ -126,12 +127,56 @@ void tags_from_buffer (char *buff) {
         // we got a subtune number, let's push the
         // current tags into the list
         uint64_t subtune_num = std::stoul(subtune_number_str);
-        tags[subtune_num] = current_tag;
+        if (tags.count(subtune_num)) {
+          // if a subtune exists, modify its properties
+          GmTagDef prev_tag = tags[subtune_num];
+
+          if (current_tag.album)
+            prev_tag.album = current_tag.album;
+          if (current_tag.company)
+            prev_tag.company = current_tag.company;
+          if (current_tag.publisher)
+            prev_tag.publisher = current_tag.publisher;
+          if (current_tag.artist)
+            prev_tag.artist = current_tag.artist;
+          if (current_tag.composer)
+            prev_tag.composer = current_tag.composer;
+          if (current_tag.sequencer)
+            prev_tag.sequencer = current_tag.sequencer;
+          if (current_tag.engineer)
+            prev_tag.engineer = current_tag.engineer;
+          // if (current_tag.date) prev_tag.date =
+          // current_tag.date;
+          if (current_tag.ripper)
+            prev_tag.ripper = current_tag.ripper;
+          if (current_tag.tagger)
+            prev_tag.tagger = current_tag.tagger;
+          if (current_tag.title)
+            prev_tag.title = current_tag.title;
+          if (current_tag.comments)
+            prev_tag.comments = current_tag.comments;
+          if (current_tag.copyright)
+            prev_tag.copyright = current_tag.copyright;
+          // if (current_tag.length) prev_tag.length =
+          // current_tag.length; if (current_tag.fade)
+          // prev_tag.fade = current_tag.fade;
+          tags[subtune_num] = prev_tag;
+        } else {
+          tags[subtune_num] = current_tag;
+        }
         current_tag = default_tags;
       }
     }
+    if (*buff_pointer == '\0')
+      break;
     buff_pointer = skip_current_line(buff_pointer);
   }
+}
+
+GmTagDef get_tags_for_subtune (unsigned long subtune) {
+  if (tags.count(subtune))
+    return tags[subtune];
+  return default_tags;
 }
 
 // skip spaces and newlines
@@ -214,7 +259,6 @@ static char *set_composer (GmTagDef &tag, char *buffer) {
   );
 }
 
-// TODO
 static char *set_company (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
   tag.company = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
@@ -266,7 +310,57 @@ static char *set_engineer (GmTagDef &tag, char *buffer) {
 }
 
 static char *set_date (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  char cur_char = *buffer++;
+  std::string year, month, day;
+
+  // get year
+  while ((cur_char >= '0') && (cur_char <= '9')) {
+    year.push_back(cur_char);
+    cur_char = *buffer++;
+  }
+
+  if (cur_char != '-') {
+    goto do_parse_date;
+  }
+
+  cur_char = *buffer++;
+
+  // get month
+  while ((cur_char >= '0') && (cur_char <= '9')) {
+    month.push_back(cur_char);
+    cur_char = *buffer++;
+  }
+
+  if ((cur_char != '-') || (month.length() < 1) ||
+      (month.length() > 2))
+  {
+    goto do_parse_date;
+  }
+
+  cur_char = *buffer++;
+
+  // get date
+  while ((cur_char >= '0') && (cur_char <= '9')) {
+    day.push_back(cur_char);
+    cur_char = *buffer++;
+  }
+
+do_parse_date:
+  if (year == "") {
+    year = "0";
+  }
+  if (month == "") {
+    month = "0";
+  }
+  if (day == "") {
+    day = "0";
+  }
+
+  tag.date.year = std::stoul(year);
+  tag.date.month = static_cast<uint8_t>(std::stoul(month));
+  tag.date.day = static_cast<uint8_t>(std::stoul(day));
+  return --buffer;
 }
 
 static char *set_ripper (GmTagDef &tag, char *buffer) {
@@ -289,11 +383,114 @@ static char *set_tagger (GmTagDef &tag, char *buffer) {
   );
 }
 
+static char *str_to_time (char *buffer, GmTagTimeDef &time) {
+  std::string tmp = "";
+  std::vector<time_t> test;
+
+  // ↓
+  // 00:00:49.000
+
+  char cur_char = *buffer++;
+  while ((cur_char >= '0') && (cur_char <= '9')) {
+    tmp.push_back(cur_char);
+    cur_char = *buffer++;
+  }
+
+  if (cur_char == '.') {
+    // must be 420.69
+    // so the buffer right now must be seconds
+    time.seconds = std::stol(tmp);
+
+    // so process just the miliseconds part
+    tmp = "";
+    cur_char = *(++buffer);
+    while ((cur_char >= '0') && (cur_char <= '9')) {
+      tmp.push_back(cur_char);
+      cur_char = *buffer++;
+    }
+    time.miliseconds = std::stol(tmp);
+    return --buffer;
+  } else if (cur_char != ':') {
+    // must be 420
+    time.seconds = std::stol(tmp);
+    return --buffer;
+  }
+
+  // save the number for now
+  // because I don't know if it's 00:07:00.00
+  // or if it's 07:00.00, or if it's 07:00, or if it's 00:07:00
+  test.push_back(std::stol(tmp));
+  tmp = "";
+
+  cur_char = *buffer++;
+  while ((cur_char >= '0') && (cur_char <= '9')) {
+    tmp.push_back(cur_char);
+    cur_char = *buffer++;
+  }
+  if (cur_char != ':') {
+    // must be 07:00.00 or 07:00
+    time.seconds = test.back() * 60;
+    time.seconds += std::stol(tmp);
+
+    if (cur_char != '.') {
+      // 07:00
+      return --buffer;
+    }
+    // 07:00.00
+    tmp = "";
+    cur_char = *(++buffer);
+    while ((cur_char >= '0') && (cur_char <= '9')) {
+      tmp.push_back(cur_char);
+      cur_char = *buffer++;
+    }
+    time.miliseconds = std::stol(tmp);
+    return --buffer;
+  }
+  // 00:07:00 or 00:07:00.00
+  test.push_back(std::stol(tmp));
+  tmp = "";
+
+  cur_char = *buffer++;
+  while ((cur_char >= '0') && (cur_char <= '9')) {
+    tmp.push_back(cur_char);
+    cur_char = *buffer++;
+  }
+  // must be 00:07:00.00 or 00:07:00
+  // minutes
+  time.seconds = test.back() * 60;
+  test.pop_back();
+  // hours
+  time.seconds = test.back() * 60 * 60;
+  time.seconds += std::stol(tmp);
+
+  if (cur_char != '.') {
+    // 00:07:00
+    return --buffer;
+  }
+  // 00:07:00.00
+  tmp = "";
+  cur_char = *(++buffer);
+  while ((cur_char >= '0') && (cur_char <= '9')) {
+    tmp.push_back(cur_char);
+    cur_char = *buffer++;
+  }
+  time.miliseconds = std::stol(tmp);
+  return --buffer;
+}
+
 static char *set_length (GmTagDef &tag, char *buffer) {
+  buffer = skip_spaces(buffer);
+  GmTagTimeDef time = GmTagTimeDef{};
+  buffer = str_to_time(buffer, time);
+  tag.length = time;
   return buffer;
 }
 
 static char *set_fade (GmTagDef &tag, char *buffer) {
+  buffer = skip_spaces(buffer);
+  GmTagTimeDef time = GmTagTimeDef{};
+  buffer = str_to_time(buffer, time);
+  tag.fade = time;
   return buffer;
 }
 
