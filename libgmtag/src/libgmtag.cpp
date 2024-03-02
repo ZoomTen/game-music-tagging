@@ -1,8 +1,6 @@
 #include "libgmtag.h"
 
 #include <stdlib.h>
-
-#include <cstdlib>
 #include <map>
 #include <string>
 
@@ -218,23 +216,53 @@ static char *set_composer (GmTagDef &tag, char *buffer) {
 
 // TODO
 static char *set_company (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.company = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.company,
+      MAX_FIELD_LENGTH
+  );
 }
 
 static char *set_publisher (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.publisher = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.publisher,
+      MAX_FIELD_LENGTH
+  );
 }
 
 static char *set_artist (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.artist = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.artist,
+      MAX_FIELD_LENGTH
+  );
 }
 
 static char *set_sequencer (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.sequencer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.sequencer,
+      MAX_FIELD_LENGTH
+  );
 }
 
 static char *set_engineer (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.engineer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.engineer,
+      MAX_FIELD_LENGTH
+  );
 }
 
 static char *set_date (GmTagDef &tag, char *buffer) {
@@ -242,11 +270,23 @@ static char *set_date (GmTagDef &tag, char *buffer) {
 }
 
 static char *set_ripper (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.ripper = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.ripper,
+      MAX_FIELD_LENGTH
+  );
 }
 
 static char *set_tagger (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.tagger = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.tagger,
+      MAX_FIELD_LENGTH
+  );
 }
 
 static char *set_length (GmTagDef &tag, char *buffer) {
@@ -258,9 +298,21 @@ static char *set_fade (GmTagDef &tag, char *buffer) {
 }
 
 static char *set_comment (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.comments = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.comments,
+      MAX_FIELD_LENGTH
+  );
 }
 
 static char *set_copyright (GmTagDef &tag, char *buffer) {
-  return buffer;
+  buffer = skip_spaces(buffer);
+  tag.copyright = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
+  return into_buffer_until_newline(
+      buffer,
+      tag.copyright,
+      MAX_FIELD_LENGTH
+  );
 }
