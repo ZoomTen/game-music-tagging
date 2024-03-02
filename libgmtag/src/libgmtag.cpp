@@ -8,21 +8,27 @@
 
 typedef char *(*BufOpFunc)(GmTagDef &, char *);
 
-static char *skip_spaces (char *);
-static char *skip_current_line (char *);
-static char *word_into_buffer (char *, char *, size_t);
-static char *into_buffer_until_newline (char *, char *, size_t);
-
 // map a track number to a GmTagDef
 static std::map<uint64_t, GmTagDef> tags;
+
+// each tag has a handler function
 static std::map<std::string, BufOpFunc> tag_handlers;
 static bool tag_handlers_init = false;
 
+// "global" tags
 static GmTagDef default_tags = {};
 
 // every field has a maximum length of:
 #define MAX_FIELD_LENGTH 256
 
+// utilities
+static char *skip_spaces (char *);
+static char *skip_current_line (char *);
+static char *word_into_buffer (char *, char *, size_t);
+static char *into_buffer_until_newline (char *, char *, size_t);
+inline bool is_number (char i);
+
+// handlers
 static char *set_album (GmTagDef &, char *);
 static char *set_company (GmTagDef &, char *);
 static char *set_publisher (GmTagDef &, char *);
@@ -39,7 +45,10 @@ static char *set_fade (GmTagDef &, char *);
 static char *set_comment (GmTagDef &, char *);
 static char *set_copyright (GmTagDef &, char *);
 
+// API
 void tags_from_buffer (char *buff) {
+  char *buff_pointer = buff;
+
   if (!tag_handlers_init) {
     tag_handlers["album"] = set_album;
     tag_handlers["company"] = set_company;
@@ -56,47 +65,48 @@ void tags_from_buffer (char *buff) {
     tag_handlers["fade"] = set_fade;
     tag_handlers["comment"] = set_comment;
     tag_handlers["copyright"] = set_copyright;
-
     tag_handlers_init = true;
   }
 
-  // read default tags
-  GmTagDef current_tag = default_tags;
+  GmTagDef current_tag = GmTagDef{};
 
-  char *buff_pointer = buff;
-
-  char *line_buffer = static_cast<char *>(malloc(256));
-  line_buffer[255] = '\0';
+  char *keyword = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
 
   char current_sigil;
   char last_sigil;
 
   while (true) {
+    // I assume every iteration starts at the
+    // beginning of the line
     buff_pointer = skip_spaces(buff_pointer);
+
     if (*buff_pointer == '#') {
-      // the meta is stored inside m3u comments
+      // this is an m3u comment. does it contain tags or not?
       buff_pointer++;
+
       buff_pointer = skip_spaces(buff_pointer);
       std::string word;
 
       switch (current_sigil = *buff_pointer++) {
         case '@':  // global tag
         case '%':  // local tag
-          if ((current_sigil == '%') && (last_sigil == '@'))
-          { /*
-             assume this is where the group of
-             "global" tags end and where the
-             "local" tags start.
-         */
+          if ((current_sigil == '%') && (last_sigil == '@')) {
+            // assume this is where the group of
+            // "global" tags end and where the
+            // "local" tags start, so save the "global"
+            // tags up to this point.
             default_tags = current_tag;
           }
-          buff_pointer =
-              word_into_buffer(buff_pointer, line_buffer, 255);
 
-          word = std::string(line_buffer);
+          buff_pointer = word_into_buffer(
+              buff_pointer,
+              keyword,
+              MAX_FIELD_LENGTH - 1
+          );
 
-          // normalize case
-          // https://stackoverflow.com/a/313990
+          word = std::string(keyword);
+
+          // normalize case: https://stackoverflow.com/a/313990
           std::transform(
               word.begin(),
               word.end(),
@@ -115,19 +125,18 @@ void tags_from_buffer (char *buff) {
 
       last_sigil = current_sigil;
     } else {
-      // must be an m3u entry, attempt to parse it
+      // this must be an m3u entry, attempt to parse it
       bool next_is_subtune_number = false;
       std::string subtune_number_str = "";
+
       while ((*buff_pointer != '\0') &&
-             (*buff_pointer != '\n') && (*buff_pointer != '\r'))
-      {
+             (*buff_pointer != '\n') &&
+             (*buff_pointer != '\r')) {
         if (*buff_pointer == '?') {
           // in case we have titles like:
-          // "Where the HELL is Carmen
-          // Sandiego???.nsf?4"
+          // "Where the HELL is Carmen Sandiego???.nsf?4"
           char next_is = *(buff_pointer + 1);
-          next_is_subtune_number =
-              ((next_is >= '0') && (next_is <= '9'));
+          next_is_subtune_number = is_number(next_is);
         } else if (next_is_subtune_number) {
           subtune_number_str.push_back(*buff_pointer);
         }
@@ -138,6 +147,7 @@ void tags_from_buffer (char *buff) {
         // we got a subtune number, let's push the
         // current tags into the list
         uint64_t subtune_num = std::stoul(subtune_number_str);
+
         if (tags.count(subtune_num)) {
           // if a subtune exists, modify its properties
           GmTagDef prev_tag = tags[subtune_num];
@@ -173,16 +183,23 @@ void tags_from_buffer (char *buff) {
           // prev_tag.fade = current_tag.fade;
           tags[subtune_num] = prev_tag;
         } else {
+          // otherwise, just add it
           tags[subtune_num] = current_tag;
         }
+
+        // create new tag
         current_tag = default_tags;
       }
     }
+
+    // end of file
     if (*buff_pointer == '\0')
       break;
+
     buff_pointer = skip_current_line(buff_pointer);
   }
-  free(line_buffer);
+
+  free(keyword);
 }
 
 GmTagDef get_tags_for_subtune (unsigned long subtune) {
@@ -271,11 +288,15 @@ void unset_tags () {
     }
   }
 }
+
+inline bool is_number (char i) {
+  return ((i >= '0') && (i <= '9'));
+}
+
 // skip spaces and newlines
 char *skip_spaces (char *i) {
   while ((*i == ' ') || (*i == '\t') || (*i == '\n') ||
-         (*i == '\r'))
-  {
+         (*i == '\r')) {
     i++;
   }
   return i;
@@ -293,8 +314,7 @@ char *
 word_into_buffer (char *source, char *buffer, size_t max_size) {
   size_t i = 0;
   while ((*source != ' ') && (*source != '\t') &&
-         (*source != '\r') && (*source != '\n'))
-  {
+         (*source != '\r') && (*source != '\n')) {
     if (++i == max_size) {
       break;
     }
@@ -431,7 +451,7 @@ static char *set_date (GmTagDef &tag, char *buffer) {
   std::string year, month, day;
 
   // get year
-  while ((cur_char >= '0') && (cur_char <= '9')) {
+  while (is_number(cur_char)) {
     year.push_back(cur_char);
     cur_char = *buffer++;
   }
@@ -443,21 +463,20 @@ static char *set_date (GmTagDef &tag, char *buffer) {
   cur_char = *buffer++;
 
   // get month
-  while ((cur_char >= '0') && (cur_char <= '9')) {
+  while (is_number(cur_char)) {
     month.push_back(cur_char);
     cur_char = *buffer++;
   }
 
   if ((cur_char != '-') || (month.length() < 1) ||
-      (month.length() > 2))
-  {
+      (month.length() > 2)) {
     goto do_parse_date;
   }
 
   cur_char = *buffer++;
 
   // get date
-  while ((cur_char >= '0') && (cur_char <= '9')) {
+  while (is_number(cur_char)) {
     day.push_back(cur_char);
     cur_char = *buffer++;
   }
@@ -513,7 +532,7 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
   // 00:00:49.000
 
   char cur_char = *buffer++;
-  while ((cur_char >= '0') && (cur_char <= '9')) {
+  while (is_number(cur_char)) {
     tmp.push_back(cur_char);
     cur_char = *buffer++;
   }
@@ -526,7 +545,7 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
     // so process just the miliseconds part
     tmp = "";
     cur_char = *(++buffer);
-    while ((cur_char >= '0') && (cur_char <= '9')) {
+    while (is_number(cur_char)) {
       tmp.push_back(cur_char);
       cur_char = *buffer++;
     }
@@ -545,7 +564,7 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
   tmp = "";
 
   cur_char = *buffer++;
-  while ((cur_char >= '0') && (cur_char <= '9')) {
+  while (is_number(cur_char)) {
     tmp.push_back(cur_char);
     cur_char = *buffer++;
   }
@@ -561,7 +580,7 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
     // 07:00.00
     tmp = "";
     cur_char = *(++buffer);
-    while ((cur_char >= '0') && (cur_char <= '9')) {
+    while (is_number(cur_char)) {
       tmp.push_back(cur_char);
       cur_char = *buffer++;
     }
@@ -573,7 +592,7 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
   tmp = "";
 
   cur_char = *buffer++;
-  while ((cur_char >= '0') && (cur_char <= '9')) {
+  while (is_number(cur_char)) {
     tmp.push_back(cur_char);
     cur_char = *buffer++;
   }
@@ -592,7 +611,7 @@ static char *str_to_time (char *buffer, GmTagTimeDef &time) {
   // 00:07:00.00
   tmp = "";
   cur_char = *(++buffer);
-  while ((cur_char >= '0') && (cur_char <= '9')) {
+  while (is_number(cur_char)) {
     tmp.push_back(cur_char);
     cur_char = *buffer++;
   }
