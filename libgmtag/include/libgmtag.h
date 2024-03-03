@@ -39,6 +39,11 @@ typedef struct gmtag_def {
   GmTagTimeDef fade;
 } GmTagDef;
 
+typedef struct gmtag_orderdef {
+  uint64_t how_many;
+  uint64_t *order;  // flexible size array
+} GmTagOrderDef;
+
 /**
  * @brief Generate a tags list from the contents of !tags.m3u.
  *
@@ -48,7 +53,7 @@ typedef struct gmtag_def {
  *
  * When you're done with tags, you should free its memory by
  * calling unset_tags().
- * 
+ *
  * @param buff !tags.m3u contents
  */
 void tags_from_buffer (char *buff);
@@ -59,17 +64,39 @@ void tags_from_buffer (char *buff);
  * If subtune is 0 or a subtune in which tags do not exist for
  * it, it will return the default tags (if any), defined as
  * global tags at the beginning of the file.
- * 
- * @param subtune 
- * @return GmTagDef 
+ *
+ * This requires tags to be init'd with tags_from_buffer().
+ *
+ * @param subtune
+ * @return GmTagDef
  */
 GmTagDef get_tags_for_subtune (unsigned long subtune);
 
 /**
  * @brief Free memory associated with tags.
- * 
+ *
+ * This requires tags to be init'd with tags_from_buffer().
+ *
  */
 void unset_tags (void);
+
+/**
+ * @brief Get the amount of subtunes defined in tags.
+ *
+ * This requires tags to be init'd with tags_from_buffer().
+ *
+ * @return int
+ */
+uint64_t get_subtune_count (void);
+
+/**
+ * @brief Get subtune order as a GmTagOrderDef, free manually.
+ *
+ * This requires tags to be init'd with tags_from_buffer().
+ *
+ * @return GmTagOrderDef*
+ */
+GmTagOrderDef *get_subtune_order (void);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,7 @@
 #include "libgmtag.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdlib>
 #include <vector>
 #include <map>
@@ -304,6 +305,28 @@ void unset_tags () {
     }
   }
 }
+
+uint64_t get_subtune_count () { return tags.size(); }
+
+GmTagOrderDef *get_subtune_order () {
+  GmTagOrderDef *orders =
+      static_cast<GmTagOrderDef *>(malloc(sizeof(GmTagOrderDef))
+      );
+
+  orders->order = static_cast<uint64_t *>(
+      calloc(tags.size(), sizeof(uint64_t))
+  );
+  orders->how_many = tags.size();
+
+  size_t i = 0;
+  for (auto tag : tags) {
+    orders->order[i++] = tag.first;
+  }
+
+  return orders;
+}
+
+// Util defines
 
 inline bool is_number (char i) {
   return ((i >= '0') && (i <= '9'));

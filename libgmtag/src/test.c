@@ -20,6 +20,14 @@ int main (void) {
 
   tags_from_buffer(tag_buf);
 
+  GmTagOrderDef *orders = get_subtune_order();
+
+  puts("Orders:");
+  for (size_t i = 0; i < orders->how_many; i++) {
+    printf("%lu ", orders->order[i]);
+  }
+  printf("\n");
+
   for (size_t i = 0; i < 20; i++) {
     GmTagDef tag = get_tags_for_subtune(i);
     printf("\n---- subtune %d ----\n", (int)i);
@@ -63,6 +71,7 @@ int main (void) {
     );
   }
 
+  free(orders);
   free(tag_buf);
   unset_tags();
   return 0;
