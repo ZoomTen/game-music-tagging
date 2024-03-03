@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 #include <map>
 #include <string>
@@ -100,7 +101,7 @@ void tags_from_buffer (char *buff) {
               // "global" tags end and where the
               // "local" tags start, so save the "global"
               // tags up to this point.
-              default_tags = current_tag;
+              memcpy(&default_tags, &current_tag, sizeof(GmTagDef));
             }
 
             buff_pointer = word_into_buffer(
