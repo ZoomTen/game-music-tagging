@@ -361,16 +361,23 @@ char *skip_spaces (char *i) {
 }
 
 char *skip_current_line (char *i) {
-  // assumes windows/unix line endings!
-  while ((*i != '\r') && (*i != '\n') && (*i != '\0')) {
+  char current_char = *i;
+
+  while ((current_char != '\r') && (current_char != '\n') && (current_char != '\0')) {
     i++;
+    current_char = *i;
   }
-  if (*i == '\0') {
-    // if EOF, just return the end addr
-    return i;
+  switch (current_char) {
+    case '\0':
+      // if EOF, just return the end addr
+      return i;
+    case '\r':
+      // dos/windows line ending
+      i++; // always assume \n, classic mac discounted
+    case '\n':
+    default:
+      return ++i;
   }
-  // otherwise, it's the next line
-  return ++i;
 }
 
 char *
