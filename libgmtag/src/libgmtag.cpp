@@ -101,7 +101,7 @@ void tags_from_buffer (char *buff) {
               // "global" tags end and where the
               // "local" tags start, so save the "global"
               // tags up to this point.
-              memcpy(&default_tags, &current_tag, sizeof(GmTagDef));
+              default_tags = current_tag;
             }
 
             buff_pointer = word_into_buffer(
@@ -415,9 +415,6 @@ char *into_buffer_until_newline (
 
 static char *set_album (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.album != nullptr) {
-    free(tag.album);
-  }
   tag.album = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -428,9 +425,6 @@ static char *set_album (GmTagDef &tag, char *buffer) {
 
 static char *set_title (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.title != nullptr) {
-    free(tag.title);
-  }
   tag.title = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -441,9 +435,6 @@ static char *set_title (GmTagDef &tag, char *buffer) {
 
 static char *set_composer (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.composer != nullptr) {
-    free(tag.composer);
-  }
   tag.composer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -454,9 +445,6 @@ static char *set_composer (GmTagDef &tag, char *buffer) {
 
 static char *set_company (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.company != nullptr) {
-    free(tag.company);
-  }
   tag.company = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -467,9 +455,6 @@ static char *set_company (GmTagDef &tag, char *buffer) {
 
 static char *set_publisher (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.publisher != nullptr) {
-    free(tag.publisher);
-  }
   tag.publisher = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -480,9 +465,6 @@ static char *set_publisher (GmTagDef &tag, char *buffer) {
 
 static char *set_artist (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.artist != nullptr) {
-    free(tag.artist);
-  }
   tag.artist = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -493,9 +475,6 @@ static char *set_artist (GmTagDef &tag, char *buffer) {
 
 static char *set_sequencer (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.sequencer != nullptr) {
-    free(tag.sequencer);
-  }
   tag.sequencer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -506,9 +485,6 @@ static char *set_sequencer (GmTagDef &tag, char *buffer) {
 
 static char *set_engineer (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.engineer != nullptr) {
-    free(tag.engineer);
-  }
   tag.engineer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -573,9 +549,6 @@ do_parse_date:
 
 static char *set_ripper (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.ripper != nullptr) {
-    free(tag.ripper);
-  }
   tag.ripper = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
@@ -586,9 +559,6 @@ static char *set_ripper (GmTagDef &tag, char *buffer) {
 
 static char *set_tagger (GmTagDef &tag, char *buffer) {
   buffer = skip_spaces(buffer);
-  if (tag.tagger != nullptr) {
-    free(tag.tagger);
-  }
   tag.tagger = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
   return into_buffer_until_newline(
       buffer,
