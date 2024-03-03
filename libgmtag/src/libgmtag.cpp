@@ -308,6 +308,26 @@ void unset_tags () {
 
 uint64_t get_subtune_count () { return tags.size(); }
 
+int64_t get_length_of_subtune (unsigned long subtune) {
+  if (tags.count(subtune)) {
+    time_t s =
+        ((tags[subtune].length.seconds * 1000) +
+         (tags[subtune].length.miliseconds));
+    return s;
+  }
+  return -1;
+}
+
+int64_t get_fade_length_of_subtune (unsigned long subtune) {
+  if (tags.count(subtune)) {
+    time_t s =
+        ((tags[subtune].fade.seconds * 1000) +
+         (tags[subtune].fade.miliseconds));
+    return s;
+  }
+  return -1;
+}
+
 GmTagOrderDef *get_subtune_order () {
   GmTagOrderDef *orders =
       static_cast<GmTagOrderDef *>(malloc(sizeof(GmTagOrderDef))

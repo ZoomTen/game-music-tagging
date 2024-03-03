@@ -98,6 +98,22 @@ uint64_t get_subtune_count (void);
  */
 GmTagOrderDef *get_subtune_order (void);
 
+/**
+ * @brief Get the length of a subtune in miliseconds.
+ * 
+ * @param subtune 
+ * @return int64_t -1 if subtune doesn't exist
+ */
+int64_t get_length_of_subtune (unsigned long subtune);
+
+/**
+ * @brief Get the fade length of a subtune in miliseconds.
+ * 
+ * @param subtune 
+ * @return int64_t -1 if subtune doesn't exist
+ */
+int64_t get_fade_length_of_subtune (unsigned long subtune);
+
 #ifdef __cplusplus
 }
 #endif
