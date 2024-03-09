@@ -555,9 +555,10 @@ These tags control how the track is played by the backend, and should be also us
   * This is usually the time it takes for the song to loop once or twice, this is left to the tagger's discretion.
   * See [Time format](#time-format) for allowed values. 
 * `fade`
-  * How long to fade out the song after the last loop.
+  * How long to fade out the song.
   * See [Time format](#time-format) for allowed values. 
   * Songs that don't loop should have a fade of 0.
+  * When determining duration, players must keep into account `length` + `fade`.
 
 #### Metadata
 
