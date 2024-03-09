@@ -551,7 +551,8 @@ Considered to be the lowest common denominator, these tags may be supported on m
 These tags control how the track is played by the backend, and should be also used to determine its duration.
 
 * `length`
-  * Length of song before the loop.
+  * Recommended length of the song.
+  * This is usually the time it takes for the song to loop once or twice, this is left to the tagger's discretion.
   * See [Time format](#time-format) for allowed values. 
 * `fade`
   * How long to fade out the song after the last loop.
