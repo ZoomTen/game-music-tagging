@@ -15,11 +15,15 @@ libgmtag_sources = [
 
 test_sources = [
     'src/test.c',
+    'src/test_suite.c',
     libgmtag_sources
 ]
+
+munit = dependency('munit', fallback: ['munit', 'munit_dep'])
 
 executable(
     'libgmtag_test',
     test_sources,
-    include_directories: ['include']
+    include_directories: ['include'],
+    dependencies: munit
 )

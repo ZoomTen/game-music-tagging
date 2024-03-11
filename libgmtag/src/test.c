@@ -1,78 +1,50 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "munit.h"
+#include "test_suite.h"
 
-#include "libgmtag.h"
+// clang-format off
+static MunitTest basic_tests[] = {
+    {"/Get subtune count",
+        test_subtune_count,
+        init_tags, deinit_tags,
+        MUNIT_TEST_OPTION_NONE, NULL
+    },
+    {"/Get subtune order",
+        test_subtune_order,
+        init_tags, deinit_tags,
+        MUNIT_TEST_OPTION_NONE, NULL
+    },
+    {"/Load subtune 1",
+        test_subtune_1,
+        init_tags, deinit_tags,
+        MUNIT_TEST_OPTION_NONE, NULL
+    },
+    {"/Load subtune 2",
+        test_subtune_2,
+        init_tags, deinit_tags,
+        MUNIT_TEST_OPTION_NONE, NULL
+    },
+    {"/Load subtune 3",
+        test_subtune_3,
+        init_tags, deinit_tags,
+        MUNIT_TEST_OPTION_NONE, NULL
+    },
+    {"/Load subtune 4",
+        test_subtune_4,
+        init_tags, deinit_tags,
+        MUNIT_TEST_OPTION_NONE, NULL
+    },
+    {0,0,0,0,0,0}
+};
 
-int main (void) {
-  // let's put the entire thing in the buffer first
-  FILE *tags = fopen("test_rip/!tags.m3u", "r");
+static MunitSuite basic[] = {
+    {"/Basic with Reload", basic_tests, NULL, 0, MUNIT_SUITE_OPTION_NONE},
+    {0,0,0,0,0}
+};
+// clang-format on
 
-  fseek(tags, 0, SEEK_END);
-  size_t tag_buf_size = (size_t)ftell(tags);
+static const MunitSuite suite =
+    {"/libgmtag", NULL, &basic, 0, MUNIT_SUITE_OPTION_NONE};
 
-  char *tag_buf = (char *)malloc(tag_buf_size + 1);
-  tag_buf[tag_buf_size] = '\0';
-
-  fseek(tags, 0, SEEK_SET);
-  fread(tag_buf, 1, tag_buf_size, tags);
-
-  fclose(tags);
-
-  tags_from_buffer(tag_buf);
-
-  GmTagOrderDef *orders = get_subtune_order();
-
-  puts("Orders:");
-  for (size_t i = 0; i < orders->how_many; i++) {
-    printf("%lu ", orders->order[i]);
-  }
-  printf("\n");
-
-  for (size_t i = 0; i < 20; i++) {
-    GmTagDef tag = get_tags_for_subtune(i);
-    printf("\n---- subtune %d ----\n", (int)i);
-    printf(
-        "Track#:    %d\n"
-        "Album:     %s\n"
-        "Company:   %s\n"
-        "Publisher: %s\n"
-        "Artist:    %s\n"
-        "Composer:  %s\n"
-        "Sequencer: %s\n"
-        "Engineer:  %s\n"
-        "Date:      %04u-%02u-%02u\n"
-        "Ripper:    %s\n"
-        "Tagger:    %s\n"
-        "Title:     %s\n"
-        "Comment:   %s\n"
-        "Copyright: %s\n"
-        "Length:    %03lu.%03lu\n"
-        "Fade:      %03lu.%03lu\n",
-        tag.track,
-        tag.album,
-        tag.company,
-        tag.publisher,
-        tag.artist,
-        tag.composer,
-        tag.sequencer,
-        tag.engineer,
-        tag.date.year,
-        tag.date.month,
-        tag.date.day,
-        tag.ripper,
-        tag.tagger,
-        tag.title,
-        tag.comments,
-        tag.copyright,
-        tag.length.seconds,
-        tag.length.miliseconds,
-        tag.fade.seconds,
-        tag.fade.miliseconds
-    );
-  }
-
-  free(orders);
-  free(tag_buf);
-  unset_tags();
-  return 0;
+int main (int argc, char **argv) {
+  return munit_suite_main(&suite, "munit", argc, argv);
 }
