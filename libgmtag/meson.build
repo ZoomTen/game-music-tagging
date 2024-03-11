@@ -3,7 +3,7 @@ project(
     ['c', 'cpp'],
     version: '0.1',
     default_options: [
-        'warning_level=everything',
+        'warning_level=3',
         'cpp_std=c++11',
         'c_std=c99'
     ]
@@ -21,9 +21,11 @@ test_sources = [
 
 munit = dependency('munit', fallback: ['munit', 'munit_dep'])
 
+includes = include_directories('include')
+
 executable(
     'libgmtag_test',
     test_sources,
-    include_directories: ['include'],
+    include_directories: includes,
     dependencies: munit
 )
