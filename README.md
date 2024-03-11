@@ -1,10 +1,10 @@
-# Proposal for a new tags format for sequenced game music rips
+# Proposal for a new tags format for sequenced game sound rips
 
-This document is a proposal to adapt vgmstream's `!tags.m3u` format to older sequenced formats to better standardize sound rips.
-
-Yet another standard is sorely needed, as *sequenced* sound rips have suffered from rag-tag tagging, limited facilities from the formats themselves, and the only other option being to give up and just use VGM—especially as the VGM format itself over time adds support for more and more sound chips.
+This document is a proposal to adapt vgmstream's `!tags.m3u` format to older sequenced formats to better standardize sequenced game sound rips.
 
 ## Abstract
+
+### From a playback standpoint
 
 Tagging is a long standing issue that has plagued old sequenced rips for over the last 20 years. Typically rips for NSF, GBS, etc. are shared in standalone files. You are forced cycle through the subtunes to find that one song you want to listen to. Additionally, they have a default time like 5 minutes or 3 minutes. There's a few formats like NSFE that address the time issue (but vary in granularity), but each format requires a custom tool, a new format (some of which die an unceremonious death like GBSX), and still don't tackle the issue of subtune cycling.
 
@@ -14,9 +14,15 @@ One solution to this problem was M3U tagging. A fine solution until you see the 
 
 (Original post: https://github.com/libgme/game-music-emu/issues/85)
 
+### From a preservation standpoint
+
+Many sequenced sound rip formats (NSF, GBS, HES, ...) have suffered from rag-tag tagging and limited facilities from the formats themselves. The only other option being to give up and just use VGM, especially as the VGM format itself over time adds support for more and more sound chips.
+
+Sequenced sound rips are advantageous over the VGM format for many reasons, one of which being preservation of **raw** sound data potentially including accurate tempo information and sound engine code, lending itself well to uses beyond simple playback. Being a simple register log at a specified sample rate, it is difficult to do the same with VGM. Thus VGM is only perfectly suited for playback, and not manipulation. Given VGM's more complete tagging format and the relative ease in which they can be generated, it incentivizes more rips done in this format rather than the native format of the game. This proposal wants to fix one of those two problems, and to fill the void left open by vgmstream's design:
+
 > vgmstream's internals are tailored to play streams so, in other words, it's not possible to add support for sequenced audio unless massive changes were done, basically becoming another program entirely. There are other projects better suited for playing sequences.
 
-## Existing extended tagging formats
+## Review of existing extended tagging formats
 
 ### Embedded
 
@@ -184,7 +190,7 @@ Notes:
 
 ## M3U sidecar formats supported by Game_Music_Emu
 
-GME sidecar formats take on the same name as the file it's meant for; e.g. `Pictionary (1990-07)(Software Creations)(LJN).m3u` is read for `Pictionary (1990-07)(Software Creation)(LJN).nsf`.
+GME sidecar formats take on the same name as the file it's meant for; e.g. `Pictionary (1990-07)(Software Creations)(LJN).m3u` is read for `Pictionary (1990-07)(Software Creations)(LJN).nsf`.
 
 ### "Knurek / HCS64" format
 
@@ -221,32 +227,166 @@ Pictionary.nsf::NSF,1,Title Screen,1:34,-,10,
 
 ## Approximate list of tags already supported by vgmplay plugins
 
-Basic tags:
+Cursory code inspection, they might not be 100% correct.
 
-* `ALBUM`
-* `ARTIST`
-* `COMMENT`
-* `GENRE`
-* `TITLE`
-
-Player-specific tags:
-
-* `ALBUMARTIST` (audacious, foobar)
-* `COMPOSER` (audacious)
-* `COPYRIGHT` (audacious)
-* `CUESHEET` (xmplay)
-* `DATE` (foobar, xmplay)
-* `DISCNUMBER` (foobar)
-* `FAMILY` (winamp)
-* `FILETYPE` (xmplay)
-* `GAIN` (winamp)
-* `PERFORMER` (audacious)
-* `PUBLISHER` (audacious, winamp)
-* `LENGTH` (winamp)
-* `TRACK` (audacious, winamp, xmplay)
-* `TOTALTRACKS` (foobar)
-* `TRACKNUMBER` (foobar, xmplay)
-* `YEAR` (audacious, winamp)
+<table>
+<thead>
+    <th scope="column">Tag</th>
+    <th scope="column">Audacious</th>
+    <th scope="column">Foobar2000</th>
+    <th scope="column">XMPlay</th>
+    <th scope="column">Winamp</th>
+</thead>
+<tbody>
+    <tr>
+        <th scope="row">ALBUM</th>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">ARTIST</th>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">COMMENT</th>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">GENRE</th>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">TITLE</th>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">ALBUMARTIST</th>
+        <td>✔</td>
+        <td>✔</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">COMPOSER</th>
+        <td>✔</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">COPYRIGHT</th>
+        <td>✔</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">CUESHEET</th>
+        <td></td>
+        <td></td>
+        <td>✔</td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">DATE</th>
+        <td></td>
+        <td>✔</td>
+        <td>✔</td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">DISCNUMBER</th>
+        <td></td>
+        <td>✔</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">FAMILY</th>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">FILETYPE</th>
+        <td></td>
+        <td></td>
+        <td>✔</td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">GAIN</th>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">PERFORMER</th>
+        <td>✔</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">PUBLISHER</th>
+        <td>✔</td>
+        <td></td>
+        <td></td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">LENGTH</th>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">TRACK</th>
+        <td>✔</td>
+        <td></td>
+        <td>✔</td>
+        <td>✔</td>
+    </tr>
+    <tr>
+        <th scope="row">TOTALTRACKS</th>
+        <td></td>
+        <td>✔</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">TRACKNUMBER</th>
+        <td></td>
+        <td>✔</td>
+        <td>✔</td>
+        <td></td>
+    </tr>
+    <tr>
+        <th scope="row">YEAR</th>
+        <td>✔</td>
+        <td></td>
+        <td></td>
+        <td>✔</td>
+    </tr>
+</tbody>
+</table>
 
 Replaygain tags:
 
@@ -309,6 +449,8 @@ All tags follow the same rules as in the vgmstream specification (including case
 * `$` - representing a [global command](#global-commands).
 * `@` - representing a global tag, which applies to all tracks, unless overridden by a local tag.
 * `%` - representing a local tag, which applies to the track directly underneath the containing comment block.
+
+Local tags are **not** to be appended to the existing global tag, but should replace it. For example, if the global `artist` tag defines `Junichi Masuda`, but a local tag for a track defines `Go Ichinose`, then the resulting `artist` tag should be `Go Ichinose`, not `Go Ichinose, Junichi Masuda`.
 
 ### Global commands
 
@@ -383,31 +525,58 @@ A.nsf?1
 
 ### List of proposed tags
 
+#### Common
+
+Considered to be the lowest common denominator, these tags may be supported on most players, particularly when it comes to on-screen display and exporting to various audio formats.
+
 * `album`
   * The title of the game.
-  * Should not be overridden as a local tag.
+  * Players should use this for its `Album` field.
+* `artist`
+  * Players should use this for its `Artist` field.
+  * When defined as a global tag, players should use it as the `Album Artist` field as well, when available.
+* `title`
+  * The title of the track. This should be its composer given name, or if unavailable, the part of the game it plays on.
+  * Players should use this for its `Title` field.
+  * Consider the following: https://www.youtube.com/watch?v=AbBpQTkTFF4
+* `comment`
+  * Notes or trivia concerning this track or the game rip.
+  * Can be defined more than once; subsequent definitions will be appended to (with a newline joining each definition) e.g. `#%comment Hello` and `#%comment World` will result in `Hello\nWorld`.
+* `track`
+  * The track number to manually assign to this track.
+  * Normally, this isn't needed as it is set automatically based on the order defined in `!tags.m3u`.
+
+#### Playback
+
+These tags control how the track is played by the backend, and should be also used to determine its duration.
+
+* `length`
+  * Recommended length of the song.
+  * This is usually the time it takes for the song to loop once or twice, this is left to the tagger's discretion.
+  * See [Time format](#time-format) for allowed values. 
+* `fade`
+  * How long to fade out the song.
+  * See [Time format](#time-format) for allowed values. 
+  * Songs that don't loop should have a fade of 0.
+  * When determining duration, players must keep into account `length` + `fade`.
+
+#### Metadata
+
+Some players support these more specific types of metadata.
+
 * `company`
   * The company which produced the game.
   * Players that only have a `Publisher` field should instead append its contents into that field.
-  * If no `Publisher` field is available, and no `artist`, `composer` and `sequencer` tags are defined either, this should go into the `Artist` field as a fallback.
-  * Should not be overridden as a local tag.
+  * If no `Publisher` field is available, and no `artist` tags is defined either, this should go into the `Artist` field as a fallback.
 * `publisher`
   * The company which published the game, if it differs from the company producing it.
   * Supporting players can insert this into their `Publisher` field.
-  * Should not be overridden as a local tag.
-* `artist`
-  * The artist for either a single track (local tag) or assumed artist for all tracks (global tag) unless specified otherwise.
-  * If specified as a global tag, then players should use this as a default for the `Artist` field, and, if supported, be placed into the `Album Artist` field as well.
-  * Local tags for a track should replace global tags. If the global tag defines `Junichi Masuda`, but a local tag for a track defines `Go Ichinose`, then the resulting `Artist` tag should be `Go Ichinose`, not `Go Ichinose, Junichi Masuda`. The album artist should remain `Junichi Masuda`, however.
-  * When either `composer`, `sequencer` and `engineer` are defined, the `artist` tag should not be read; instead it is a combination of `composer` and `sequencer`.
 * `composer`
-  * The composer for either a single track (local tag) or assumed composer for all tracks (global tag) unless specified otherwise. This is the person who writes the game's score.
-  * If specified as a global tag, then players should use this as a default for the `Composer` field.
-  * Local tags for a track should replace global tags, see `artist`.
-  * May be combined with `sequencer` to create the `artist` field.
+  * This is the person who writes the game's score.
+  * When available, players should use this for its `Composer` field.
 * `sequencer`
-  * The sequencer for either a single track (local tag) or assumed sequencer for all tracks (global tag) unless specified otherwise. This is the person who transcribes the composer's score into the game's format.
-  * May be combined with `composer` to create the `artist` field.
+  * This is the person who transcribes the composer's score into the game's format.
+  * When available, players should use this for its `Performer` field.
 * `engineer`
   * The engineer for either a single track (local tag) or assumed engineer for all tracks (global tag) unless specified otherwise. I assume this is the person who wrote the sound driver.
   * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
@@ -419,30 +588,14 @@ A.nsf?1
   * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
 * `tagger`
   * May be shown for informational purposes (e.g. in a `Comments` field), otherwise can be safely ignored by the player.
-* `title`
-  * The title of the track. This should be its composer given name, or if unavailable, the part of the game it plays on. Consider: https://www.youtube.com/watch?v=AbBpQTkTFF4
-  * Supporting players can insert this into their `Title` field.
-* `length`
-  * Length of song before the loop.
-  * See [Time format](#time-format) for allowed values. 
-* `fade`
-  * How long to fade out the song after the last loop.
-  * See [Time format](#time-format) for allowed values. 
-  * Songs that don't loop should have a fade of 0:00:00.000.
-* `comment`
-  * Notes or trivia concerning this track or the game rip.
-  * Can be defined more than once; subsequent definitions will be appended to (with a newline joining each definition) e.g. `#%comment Hello` and `#%comment World` will result in `Hello\nWorld`.
 * `copyright`
   * The applicable copyright string, its format similar to existing formats, e.g. `1995 Nintendo`.
   * Supporting players can just insert this into their `Copyright` field.
-* `track`
-  * The track number to manually assign to this track.
-  * Normally, this isn't needed as it is set automatically based on the order defined in `!tags.m3u`.
 
-**Notes**:
+#### Additional notes
 
 * When defined multiple times for a track, local tags *excluding* `comment` should overwrite the previous definition.
-* When multiple entities are involved in one quality of the soundtrack, e.g. more than one composer should be listed in a `composer` field, all entities must be listed as that tag's value in one line, with a comma and a space `, ` separating each value.
+* When multiple entities are involved in one aspect of the track(s), e.g. more than one composer should be listed in a `composer` field, all entities must be listed as that tag's value in one line, with *at least* a comma `,` separating each value.
 
 ### Time format
 
@@ -520,7 +673,7 @@ Each part may be zero-padded, or not.
 <dl>
     <dt>Legacy purpose</dt>
     <dd>
-        The companies who developed and published the game. This usually
+        The game's release date. This usually
         follows YYYY-MM-DD.
     </dd>
     <dt>Should map to</dt>
@@ -531,9 +684,7 @@ Each part may be zero-padded, or not.
     </dd>
     <dt>Rationale</dt>
     <dd>
-        I think the existing vgmstream
-        implementations just have a <code>@year</code>. Ideally, just <code>@date</code> should be
-        filled in and then the year can be derived from it. But if you <i>really</i> want compatibility, fill both in. But make sure <code>@year</code> is an integer!
+        -
     </dd>
 </dl>
 
@@ -682,5 +833,4 @@ Like this document, all of them are works in progress. They may not yet conform 
 * [Fork of NEZPlug++ Winamp plugin with !tags.m3u support](https://github.com/romh-acking/nezplug-m3u-tags)
 * [Fork of Audacious Console Music plugin with !tags.m3u support](https://github.com/ZoomTen/audacious-plugin-gme/tree/tags-m3u)
   * Added on top of the updates to libgme.
-  * Still works by loading in the gbs file, not the m3u. Although, m3u would work provided the files are the `Actual Rip (2024)[GBC].gbs?1` with the subtune suffixes.
-* [Preliminary support in Zumi's gbstools](https://gitgud.io/zumi-gbs/hcs/gbstools/-/blob/master/gbsdist.py)
+* [Support in Zumi's gbstools](https://gitgud.io/zumi-gbs/hcs/gbstools/-/blob/master/gbsdist.py)
