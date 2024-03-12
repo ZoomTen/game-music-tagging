@@ -329,6 +329,14 @@ int64_t get_fade_length_of_subtune (unsigned long subtune) {
   return -1;
 }
 
+int64_t get_duration_of_subtune (unsigned long subtune) {
+  if (!tags.count(subtune)) {
+    return -1;
+  }
+  return get_length_of_subtune(subtune) +
+         get_fade_length_of_subtune(subtune);
+}
+
 GmTagOrderDef *get_subtune_order () {
   GmTagOrderDef *orders =
       static_cast<GmTagOrderDef *>(malloc(sizeof(GmTagOrderDef))
