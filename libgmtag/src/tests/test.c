@@ -1,5 +1,5 @@
 #include "munit.h"
-#include "test_suite.h"
+#include "test_suite_1.h"
 
 // clang-format off
 static MunitTest basic_tests[] = {
