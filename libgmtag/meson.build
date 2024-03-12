@@ -5,7 +5,9 @@ project(
     default_options: [
         'warning_level=3',
         'cpp_std=c++11',
-        'c_std=c99'
+        'c_std=c99',
+        'b_sanitize=address,undefined',
+        'b_coverage=true'
     ]
 )
 
