@@ -18,6 +18,7 @@ libgmtag_sources = [
 test_sources = [
     'src/tests/test.c',
     'src/tests/test_suite_1.c',
+    'src/tests/test_suite_2.c',
     libgmtag_sources
 ]
 

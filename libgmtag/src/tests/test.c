@@ -1,5 +1,6 @@
 #include "munit.h"
 #include "test_suite_1.h"
+#include "test_suite_2.h"
 
 // clang-format off
 static MunitTest basic_tests[] = {
@@ -36,8 +37,19 @@ static MunitTest basic_tests[] = {
     {0,0,0,0,0,0}
 };
 
+
+static MunitTest tests_2[] = {
+    {"/Load migrated tags",
+        test_migrated_tags,
+        init_tags_2, deinit_tags_2,
+        MUNIT_TEST_OPTION_NONE, NULL
+    },
+    {0,0,0,0,0,0}
+};
+
 static MunitSuite basic[] = {
     {"/Basic with Reload", basic_tests, NULL, 0, MUNIT_SUITE_OPTION_NONE},
+    {"/Tests 2", tests_2, NULL, 0, MUNIT_SUITE_OPTION_NONE},
     {0,0,0,0,0}
 };
 // clang-format on
