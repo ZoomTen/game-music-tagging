@@ -55,7 +55,7 @@ static MunitSuite basic[] = {
 // clang-format on
 
 static const MunitSuite suite =
-    {"/libgmtag", NULL, &basic, 0, MUNIT_SUITE_OPTION_NONE};
+    {"/libgmtag", NULL, (MunitSuite *) &basic, 0, MUNIT_SUITE_OPTION_NONE};
 
 int main (int argc, char **argv) {
   return munit_suite_main(&suite, "munit", argc, argv);

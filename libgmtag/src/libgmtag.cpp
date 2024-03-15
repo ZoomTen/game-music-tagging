@@ -1,5 +1,3 @@
-#include "libgmtag.h"
-
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
@@ -8,49 +6,26 @@
 #include <map>
 #include <string>
 
+#include "libgmtag.h"
+#include "./private/gmtag.hpp"
+
 typedef char *(*BufOpFunc)(GmTagDef &, char *);
 
 // map a track number to a GmTagDef
-static std::map<uint64_t, GmTagDef> tags;
-
-// each tag has a handler function
-static std::map<std::string, BufOpFunc> tag_handlers;
-static bool tag_handlers_init = false;
+std::map<uint64_t, GmTagDef> tags;
 
 // "global" tags
-static GmTagDef default_tags = {};
-static uint64_t track_num = 1;
+GmTagDef default_tags = {};
 
-// every field has a maximum length of:
-#define MAX_FIELD_LENGTH 256
-
-// utilities
-static char *skip_spaces (char *);
-static char *skip_current_line (char *);
-static char *word_into_buffer (char *, char *, size_t);
-static char *into_buffer_until_newline (char *, char *, size_t);
-static inline bool is_number (char i);
-
-// handlers
-static char *set_track (GmTagDef &, char *);
-static char *set_album (GmTagDef &, char *);
-static char *set_company (GmTagDef &, char *);
-static char *set_publisher (GmTagDef &, char *);
-static char *set_artist (GmTagDef &, char *);
-static char *set_composer (GmTagDef &, char *);
-static char *set_sequencer (GmTagDef &, char *);
-static char *set_engineer (GmTagDef &, char *);
-static char *set_date (GmTagDef &, char *);
-static char *set_ripper (GmTagDef &, char *);
-static char *set_tagger (GmTagDef &, char *);
-static char *set_title (GmTagDef &, char *);
-static char *set_length (GmTagDef &, char *);
-static char *set_fade (GmTagDef &, char *);
-static char *set_comment (GmTagDef &, char *);
-static char *set_copyright (GmTagDef &, char *);
+#include "./private/utils.hpp"
+#include "./private/setters.hpp"
+#include "./private/getters.hpp"
 
 // API
 void tags_from_buffer (char *buff) {
+  static bool tag_handlers_init = false;
+  static std::map<std::string, BufOpFunc> tag_handlers;
+
   char *buff_pointer = buff;
 
   if (!tag_handlers_init) {
@@ -73,7 +48,9 @@ void tags_from_buffer (char *buff) {
     tag_handlers_init = true;
   }
 
+  tags.clear();
   GmTagDef current_tag = GmTagDef{};
+  uint64_t track_num = 1;
 
   char *keyword = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
 
@@ -165,31 +142,31 @@ void tags_from_buffer (char *buff) {
             // if a subtune exists, modify its properties
             GmTagDef prev_tag = tags[subtune_num];
 
-            if (current_tag.album)
+            if (!current_tag.album.empty())
               prev_tag.album = current_tag.album;
-            if (current_tag.company)
+            if (!current_tag.company.empty())
               prev_tag.company = current_tag.company;
-            if (current_tag.publisher)
+            if (!current_tag.publisher.empty())
               prev_tag.publisher = current_tag.publisher;
-            if (current_tag.artist)
+            if (!current_tag.artist.empty())
               prev_tag.artist = current_tag.artist;
-            if (current_tag.composer)
+            if (!current_tag.composer.empty())
               prev_tag.composer = current_tag.composer;
-            if (current_tag.sequencer)
+            if (!current_tag.sequencer.empty())
               prev_tag.sequencer = current_tag.sequencer;
-            if (current_tag.engineer)
+            if (!current_tag.engineer.empty())
               prev_tag.engineer = current_tag.engineer;
             // if (current_tag.date) prev_tag.date =
             // current_tag.date;
-            if (current_tag.ripper)
+            if (!current_tag.ripper.empty())
               prev_tag.ripper = current_tag.ripper;
-            if (current_tag.tagger)
+            if (!current_tag.tagger.empty())
               prev_tag.tagger = current_tag.tagger;
-            if (current_tag.title)
+            if (!current_tag.title.empty())
               prev_tag.title = current_tag.title;
-            if (current_tag.comments)
+            if (!current_tag.comments.empty())
               prev_tag.comments = current_tag.comments;
-            if (current_tag.copyright)
+            if (!current_tag.copyright.empty())
               prev_tag.copyright = current_tag.copyright;
             // if (current_tag.length) prev_tag.length =
             // current_tag.length; if (current_tag.fade)
@@ -220,527 +197,8 @@ void tags_from_buffer (char *buff) {
   free(keyword);
 }
 
-GmTagDef get_tags_for_subtune (unsigned long subtune) {
-  if (tags.count(subtune))
-    return tags[subtune];
-  return default_tags;
-}
-
 void unset_tags () {
-  {  // unset default tags
-    if (default_tags.album) {
-      free(default_tags.album);
-    }
-    if (default_tags.company) {
-      free(default_tags.company);
-    }
-    if (default_tags.publisher) {
-      free(default_tags.publisher);
-    }
-    if (default_tags.artist) {
-      free(default_tags.artist);
-    }
-    if (default_tags.composer) {
-      free(default_tags.composer);
-    }
-    if (default_tags.sequencer) {
-      free(default_tags.sequencer);
-    }
-    if (default_tags.engineer) {
-      free(default_tags.engineer);
-    }
-    if (default_tags.ripper) {
-      free(default_tags.ripper);
-    }
-    if (default_tags.tagger) {
-      free(default_tags.tagger);
-    }
-    if (default_tags.title) {
-      free(default_tags.title);
-    }
-    if (default_tags.comments) {
-      free(default_tags.comments);
-    }
-    if (default_tags.copyright) {
-      free(default_tags.copyright);
-    }
-  }
-  {  // then unset unique tags
-    for (auto tag : tags) {
-      if (tag.second.album != default_tags.album) {
-        free(tag.second.album);
-      }
-      if (tag.second.company != default_tags.company) {
-        free(tag.second.company);
-      }
-      if (tag.second.publisher != default_tags.publisher) {
-        free(tag.second.publisher);
-      }
-      if (tag.second.artist != default_tags.artist) {
-        free(tag.second.artist);
-      }
-      if (tag.second.composer != default_tags.composer) {
-        free(tag.second.composer);
-      }
-      if (tag.second.sequencer != default_tags.sequencer) {
-        free(tag.second.sequencer);
-      }
-      if (tag.second.engineer != default_tags.engineer) {
-        free(tag.second.engineer);
-      }
-      if (tag.second.ripper != default_tags.ripper) {
-        free(tag.second.ripper);
-      }
-      if (tag.second.tagger != default_tags.tagger) {
-        free(tag.second.tagger);
-      }
-      if (tag.second.title != default_tags.title) {
-        free(tag.second.title);
-      }
-      if (tag.second.comments != default_tags.comments) {
-        free(tag.second.comments);
-      }
-      if (tag.second.copyright != default_tags.copyright) {
-        free(tag.second.copyright);
-      }
-    }
-  }
+  // ?
 }
 
-uint64_t get_subtune_count () { return tags.size(); }
 
-int64_t get_length_of_subtune (unsigned long subtune) {
-  if (tags.count(subtune)) {
-    time_t s =
-        ((tags[subtune].length.seconds * 1000) +
-         (tags[subtune].length.miliseconds));
-    return s;
-  }
-  return -1;
-}
-
-int64_t get_fade_length_of_subtune (unsigned long subtune) {
-  if (tags.count(subtune)) {
-    time_t s =
-        ((tags[subtune].fade.seconds * 1000) +
-         (tags[subtune].fade.miliseconds));
-    return s;
-  }
-  return -1;
-}
-
-int64_t get_duration_of_subtune (unsigned long subtune) {
-  if (!tags.count(subtune)) {
-    return -1;
-  }
-  return get_length_of_subtune(subtune) +
-         get_fade_length_of_subtune(subtune);
-}
-
-GmTagOrderDef *get_subtune_order () {
-  GmTagOrderDef *orders =
-      static_cast<GmTagOrderDef *>(malloc(sizeof(GmTagOrderDef))
-      );
-
-  orders->order = static_cast<uint64_t *>(
-      calloc(tags.size(), sizeof(uint64_t))
-  );
-  orders->how_many = tags.size();
-
-  size_t i = 0;
-  for (auto tag : tags) {
-    orders->order[i++] = tag.first;
-  }
-
-  return orders;
-}
-
-// Util defines
-
-inline bool is_number (char i) {
-  return ((i >= '0') && (i <= '9'));
-}
-
-// skip spaces
-char *skip_spaces (char *i) {
-  while ((*i == ' ') || (*i == '\t')) {
-    i++;
-  }
-  return i;
-}
-
-char *skip_current_line (char *i) {
-  char current_char = *i;
-
-  while ((current_char != '\r') && (current_char != '\n') &&
-         (current_char != '\0'))
-  {
-    i++;
-    current_char = *i;
-  }
-  switch (current_char) {
-    case '\0':
-      // if EOF, just return the end addr
-      return i;
-    case '\r':
-      // dos/windows line ending
-      i++;  // always assume \n, classic mac discounted
-    case '\n':
-    default:
-      return ++i;
-  }
-}
-
-char *
-word_into_buffer (char *source, char *buffer, size_t max_size) {
-  size_t i = 0;
-  while ((*source != ' ') && (*source != '\t') &&
-         (*source != '\r') && (*source != '\n'))
-  {
-    if (++i == max_size) {
-      break;
-    }
-    *buffer++ = *source++;
-  }
-  *buffer = '\0';
-  return source;
-}
-
-char *into_buffer_until_newline (
-    char *source,
-    char *buffer,
-    size_t max_size
-) {
-  size_t i = 0;
-  // also assumes windows/unix line endings!
-  while ((*source != '\n') && (*source != '\r')) {
-    if (++i == max_size) {
-      break;
-    }
-    *buffer++ = *source++;
-  }
-  *buffer = '\0';
-  return source;
-}
-
-static char *set_album (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.album = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.album,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_title (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.title = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.title,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_composer (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.composer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.composer,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_company (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.company = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.company,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_publisher (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.publisher = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.publisher,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_artist (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.artist = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.artist,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_sequencer (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.sequencer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.sequencer,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_engineer (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.engineer = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.engineer,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_date (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  char cur_char = *buffer++;
-  std::string year, month, day;
-
-  // get year
-  while (is_number(cur_char)) {
-    year.push_back(cur_char);
-    cur_char = *buffer++;
-  }
-
-  if (cur_char != '-') {
-    goto do_parse_date;
-  }
-
-  cur_char = *buffer++;
-
-  // get month
-  while (is_number(cur_char)) {
-    month.push_back(cur_char);
-    cur_char = *buffer++;
-  }
-
-  if ((cur_char != '-') || (month.length() < 1) ||
-      (month.length() > 2))
-  {
-    goto do_parse_date;
-  }
-
-  cur_char = *buffer++;
-
-  // get date
-  while (is_number(cur_char)) {
-    day.push_back(cur_char);
-    cur_char = *buffer++;
-  }
-
-do_parse_date:
-  if (year == "") {
-    year = "0";
-  }
-  if (month == "") {
-    month = "0";
-  }
-  if (day == "") {
-    day = "0";
-  }
-
-  tag.date.year = std::stoul(year);
-  tag.date.month = static_cast<uint8_t>(std::stoul(month));
-  tag.date.day = static_cast<uint8_t>(std::stoul(day));
-  return --buffer;
-}
-
-static char *set_ripper (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.ripper = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.ripper,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_tagger (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.tagger = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.tagger,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *str_to_time (char *buffer, GmTagTimeDef &time) {
-  // in case this was called with uninit'd &time
-  time.seconds = 0;
-  time.miliseconds = 0;
-
-  std::string tmp = "";
-  std::vector<time_t> tmp_stack;
-
-  char cur_char = *buffer++;
-  while (is_number(cur_char)) {
-    tmp.push_back(cur_char);
-    cur_char = *buffer++;
-  }
-
-  if (cur_char == '.') {
-    // must be 420.690
-    // so the buffer right now must be seconds
-    time.seconds = std::stol(tmp);
-
-    // then process just the miliseconds part
-    tmp = "";
-    cur_char = *(++buffer);
-    while (is_number(cur_char)) {
-      tmp.push_back(cur_char);
-      cur_char = *buffer++;
-    }
-    time.miliseconds = std::stol(tmp);
-    return --buffer;
-
-  } else if (cur_char != ':') {
-    // must be 420
-    time.seconds = std::stol(tmp);
-    return --buffer;
-  }
-
-  // save the number for now
-  // because I don't know if it's 00:07:00.690
-  // or if it's 07:00.690 or what…
-  tmp_stack.push_back(std::stol(tmp));
-  tmp = "";
-
-  cur_char = *buffer++;
-  while (is_number(cur_char)) {
-    tmp.push_back(cur_char);
-    cur_char = *buffer++;
-  }
-
-  if (cur_char != ':') {
-    // must be 07:00.690 or 07:00
-    time.seconds = tmp_stack.back() * 60;
-    time.seconds += std::stol(tmp);
-
-    if (cur_char != '.') {  // 07:00
-      return --buffer;
-    }
-
-    // 07:00.690
-    tmp = "";
-    cur_char = *(++buffer);
-    while (is_number(cur_char)) {
-      tmp.push_back(cur_char);
-      cur_char = *buffer++;
-    }
-    time.miliseconds = std::stol(tmp);
-    return --buffer;
-  }
-
-  // this leaves us with 00:07:00 or 00:07:00.690
-  tmp_stack.push_back(std::stol(tmp));
-  tmp = "";
-
-  cur_char = *buffer++;
-  while (is_number(cur_char)) {
-    tmp.push_back(cur_char);
-    cur_char = *buffer++;
-  }
-
-  // minutes
-  time.seconds = tmp_stack.back() * 60;
-  tmp_stack.pop_back();
-
-  // hours
-  time.seconds = tmp_stack.back() * 60 * 60;
-  time.seconds += std::stol(tmp);
-
-  if (cur_char != '.') {
-    // 00:07:00
-    return --buffer;
-  }
-
-  // 00:07:00.690
-  tmp = "";
-  cur_char = *(++buffer);
-  while (is_number(cur_char)) {
-    tmp.push_back(cur_char);
-    cur_char = *buffer++;
-  }
-  time.miliseconds = std::stol(tmp);
-
-  return --buffer;
-}
-
-static char *set_length (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  GmTagTimeDef time = GmTagTimeDef{};
-  buffer = str_to_time(buffer, time);
-  tag.length = time;
-  return buffer;
-}
-
-static char *set_fade (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  GmTagTimeDef time = GmTagTimeDef{};
-  buffer = str_to_time(buffer, time);
-  tag.fade = time;
-  return buffer;
-}
-
-static char *set_comment (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  if (tag.comments) {
-    // append to existing
-    size_t i = 0;
-    char *cmttag = tag.comments;
-    // find end of comment field
-    while (*cmttag++ != '\0') {
-      i++;
-    }
-    cmttag--;
-    *cmttag++ = '\n';
-    return into_buffer_until_newline(
-        buffer,
-        cmttag,
-        MAX_FIELD_LENGTH - i
-    );
-  }
-  tag.comments = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.comments,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_copyright (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  tag.copyright = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
-  return into_buffer_until_newline(
-      buffer,
-      tag.copyright,
-      MAX_FIELD_LENGTH
-  );
-}
-
-static char *set_track (GmTagDef &tag, char *buffer) {
-  buffer = skip_spaces(buffer);
-  std::string tmp;
-  char cur_char = *buffer++;
-  while (is_number(cur_char)) {
-    tmp.push_back(cur_char);
-    cur_char = *buffer++;
-  }
-  if (tmp.length() > 0) {
-    tag.track = std::stoul(tmp);
-  }
-  return --buffer;
-}

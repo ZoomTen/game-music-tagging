@@ -1,0 +1,16 @@
+char *set_track (GmTagDef &, char *);
+char *set_album (GmTagDef &, char *);
+char *set_company (GmTagDef &, char *);
+char *set_publisher (GmTagDef &, char *);
+char *set_artist (GmTagDef &, char *);
+char *set_composer (GmTagDef &, char *);
+char *set_sequencer (GmTagDef &, char *);
+char *set_engineer (GmTagDef &, char *);
+char *set_date (GmTagDef &, char *);
+char *set_ripper (GmTagDef &, char *);
+char *set_tagger (GmTagDef &, char *);
+char *set_title (GmTagDef &, char *);
+char *set_length (GmTagDef &, char *);
+char *set_fade (GmTagDef &, char *);
+char *set_comment (GmTagDef &, char *);
+char *set_copyright (GmTagDef &, char *);
