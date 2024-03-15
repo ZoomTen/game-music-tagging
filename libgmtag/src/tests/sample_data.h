@@ -1,7 +1,8 @@
-static const char *tag_init_data =
-    "## This !tags.m3u is formatted weirdly\n"
-    "## in order to test how sloppy the library\n"
-    "## can take it\n"
+/* This particular one is formatted weirdly to test
+ * how sloppy of a file the library can handle.
+ * *** THIS IS NOT A RECOMMENDATION!!! ***
+ */
+static char *tag_init_data =
     "\n"
     "#@ALBUM Zumi's GB Music Engine v1\n"
     "#@company Zumi\n"
@@ -42,7 +43,7 @@ static const char *tag_init_data =
     "# %composer Rebecca Sugar, Aivi & Surasshu\n"
     "gbstest.gbs?6\n";
 
-static const char *katakis_3d_test =
+static char *katakis_3d_test =
     "\n"
     "# @album       Katakis 3D\n"
     "# @company     Similis\n"

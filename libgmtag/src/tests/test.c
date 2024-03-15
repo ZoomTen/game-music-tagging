@@ -39,23 +39,28 @@ static MunitTest basic_tests[] = {
 
 
 static MunitTest tests_2[] = {
-    {"/Load migrated tags",
-        test_migrated_tags,
-        init_tags_2, deinit_tags_2,
+    {"/Replace one set of tags with another",
+        test_tags_after_reload,
+        NULL, NULL,
         MUNIT_TEST_OPTION_NONE, NULL
     },
     {0,0,0,0,0,0}
 };
 
 static MunitSuite basic[] = {
-    {"/Basic with Reload", basic_tests, NULL, 0, MUNIT_SUITE_OPTION_NONE},
-    {"/Tests 2", tests_2, NULL, 0, MUNIT_SUITE_OPTION_NONE},
+    {"/Basic", basic_tests, NULL, 0, MUNIT_SUITE_OPTION_NONE},
+    {"/Misc", tests_2, NULL, 0, MUNIT_SUITE_OPTION_NONE},
     {0,0,0,0,0}
 };
 // clang-format on
 
-static const MunitSuite suite =
-    {"/libgmtag", NULL, (MunitSuite *) &basic, 0, MUNIT_SUITE_OPTION_NONE};
+static const MunitSuite suite = {
+    "/libgmtag",
+    NULL,
+    (MunitSuite *)&basic,
+    0,
+    MUNIT_SUITE_OPTION_NONE
+};
 
 int main (int argc, char **argv) {
   return munit_suite_main(&suite, "munit", argc, argv);

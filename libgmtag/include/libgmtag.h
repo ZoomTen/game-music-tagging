@@ -37,11 +37,10 @@ typedef struct gmtag_orderdef {
  *
  * @param buff !tags.m3u contents
  */
-void tags_from_buffer (char *buff);
-
+void tags_from_buffer (const char *buff);
 
 /**
- * @brief Free memory associated with tags.
+ * @brief Manually free memory associated with tags.
  *
  * This requires tags to be init'd with tags_from_buffer().
  *

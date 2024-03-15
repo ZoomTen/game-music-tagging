@@ -1,15 +1,14 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
-#include <vector>
 #include <map>
 #include <string>
-
 #include "libgmtag.h"
 #include "./private/gmtag.hpp"
+#include "./private/utils.hpp"
+#include "./private/setters.hpp"
 
-typedef char *(*BufOpFunc)(GmTagDef &, char *);
+typedef const char *(*BufOpFunc)(GmTagDef &, const char *);
 
 // map a track number to a GmTagDef
 std::map<uint64_t, GmTagDef> tags;
@@ -17,16 +16,12 @@ std::map<uint64_t, GmTagDef> tags;
 // "global" tags
 GmTagDef default_tags = {};
 
-#include "./private/utils.hpp"
-#include "./private/setters.hpp"
-#include "./private/getters.hpp"
-
 // API
-void tags_from_buffer (char *buff) {
+void tags_from_buffer (const char *buff) {
   static bool tag_handlers_init = false;
   static std::map<std::string, BufOpFunc> tag_handlers;
 
-  char *buff_pointer = buff;
+  const char *buff_pointer = buff;
 
   if (!tag_handlers_init) {
     tag_handlers["track"] = set_track;
@@ -54,8 +49,8 @@ void tags_from_buffer (char *buff) {
 
   char *keyword = static_cast<char *>(malloc(MAX_FIELD_LENGTH));
 
-  char current_sigil;
-  char last_sigil;
+  char current_sigil = 0;
+  char last_sigil = 0;
 
   // while not EOF
   while (*buff_pointer != '\0') {
@@ -197,8 +192,4 @@ void tags_from_buffer (char *buff) {
   free(keyword);
 }
 
-void unset_tags () {
-  // ?
-}
-
-
+void unset_tags () { tags.clear(); }

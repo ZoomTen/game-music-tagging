@@ -33,7 +33,10 @@ test_includes = include_directories('include', 'include/tests')
 libgmtag = static_library(
     'gmtag',
     libgmtag_sources,
-    include_directories: libgmtag_includes
+    include_directories: libgmtag_includes,
+    override_options: [
+        'optimization=3'
+    ]
 )
 
 executable(
