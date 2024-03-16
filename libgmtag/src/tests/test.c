@@ -44,6 +44,11 @@ static MunitTest tests_2[] = {
         NULL, NULL,
         MUNIT_TEST_OPTION_NONE, NULL
     },
+    {"/Weirdness",
+        test_tag_weirdness,
+        NULL, NULL,
+        MUNIT_TEST_OPTION_NONE, NULL
+    },
     {0,0,0,0,0,0}
 };
 

@@ -24,6 +24,7 @@ test_subtune_count (const MunitParameter params[], void *data) {
   UNUSED(params);
   UNUSED(data);
   UNUSED(katakis_3d_test);
+  UNUSED(test_spec_derps);
 
   assert_uint64(get_subtune_count(), ==, 4);
   return MUNIT_OK;

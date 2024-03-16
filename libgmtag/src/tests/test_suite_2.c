@@ -222,3 +222,17 @@ MunitResult test_tags_after_reload (
 
   return MUNIT_OK;
 }
+
+MunitResult
+test_tag_weirdness (const MunitParameter params[], void *data) {
+  UNUSED(params);
+  UNUSED(data);
+
+  UNUSED(katakis_3d_test);
+
+  // simulate reloading tracks
+  tags_from_buffer(tag_init_data);
+  tags_from_buffer(test_spec_derps);
+
+  return MUNIT_OK;
+}
