@@ -5,7 +5,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-namespace GmTag {
 #endif
 
 typedef struct gmtag_timedef {
@@ -111,6 +110,5 @@ GmTagTimeDef get_length (unsigned long subtune);
 GmTagTimeDef get_fade (unsigned long subtune);
 
 #ifdef __cplusplus
-}
 }
 #endif
