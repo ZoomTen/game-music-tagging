@@ -574,6 +574,9 @@ Some players support these more specific types of metadata.
 * `composer`
   * This is the person who writes the game's score.
   * When available, players should use this for its `Composer` field.
+* `arranger`
+  * This is the person who tweaks the composer's score or to adjust it to fit the game's limitations.
+  * When available, players should use this for its `Arranger` field.
 * `sequencer`
   * This is the person who transcribes the composer's score into the game's format.
   * When available, players should use this for its `Performer` field.
