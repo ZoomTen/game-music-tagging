@@ -12,6 +12,7 @@ typedef struct gmtag_def
   std::string publisher;
   std::string artist;
   std::string composer;
+  std::string arranger;
   std::string sequencer;
   std::string engineer;
   std::string ripper;

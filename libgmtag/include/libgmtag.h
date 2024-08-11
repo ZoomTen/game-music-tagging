@@ -119,6 +119,7 @@ extern "C"
   char *get_artist (GmTagObject handle, unsigned long subtune);
   char *get_composer (GmTagObject handle, unsigned long subtune);
   char *get_sequencer (GmTagObject handle, unsigned long subtune);
+  char *get_arranger (GmTagObject handle, unsigned long subtune);
   char *get_engineer (GmTagObject handle, unsigned long subtune);
   char *get_ripper (GmTagObject handle, unsigned long subtune);
   char *get_tagger (GmTagObject handle, unsigned long subtune);

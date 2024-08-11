@@ -29,6 +29,7 @@ GmTagObject tags_from_buffer (const char *const buff)
     tag_handlers["artist"] = set_artist;
     tag_handlers["composer"] = set_composer;
     tag_handlers["sequencer"] = set_sequencer;
+    tag_handlers["arranger"] = set_arranger;
     tag_handlers["engineer"] = set_engineer;
     tag_handlers["date"] = set_date;
     tag_handlers["ripper"] = set_ripper;
@@ -161,6 +162,8 @@ GmTagObject tags_from_buffer (const char *const buff)
                 prev_tag.artist = current_tag.artist;
               if (!current_tag.composer.empty())
                 prev_tag.composer = current_tag.composer;
+              if (!current_tag.arranger.empty())
+                prev_tag.arranger = current_tag.arranger;
               if (!current_tag.sequencer.empty())
                 prev_tag.sequencer = current_tag.sequencer;
               if (!current_tag.engineer.empty())

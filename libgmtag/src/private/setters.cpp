@@ -50,6 +50,11 @@ const char *set_sequencer (GmTagDef &tag, const char *buffer)
   return set_generic(tag.sequencer, buffer);
 }
 
+const char *set_arranger (GmTagDef &tag, const char *buffer)
+{
+  return set_generic(tag.arranger, buffer);
+}
+
 const char *set_engineer (GmTagDef &tag, const char *buffer)
 {
   return set_generic(tag.engineer, buffer);

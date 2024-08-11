@@ -141,6 +141,13 @@ char *get_sequencer (GmTagObject handle, unsigned long subtune)
   return i;
 }
 
+char *get_arranger (GmTagObject handle, unsigned long subtune)
+{
+  GmTagDef tag = get_tags_for_subtune(handle, subtune);
+  char *i = strdup(tag.arranger.c_str());
+  return i;
+}
+
 char *get_engineer (GmTagObject handle, unsigned long subtune)
 {
   GmTagDef tag = get_tags_for_subtune(handle, subtune);
