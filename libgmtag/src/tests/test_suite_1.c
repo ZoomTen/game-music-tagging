@@ -100,17 +100,23 @@ test_subtune_1 (const MunitParameter params[], void *data)
   assert_string_equal(title, "Ocean Loader 4");
   assert_string_equal(composer, "Jonathan Dunn");
   assert_string_equal(comment, "Just a short snippet.");
-  munit_assert_type(time_t, "lu", get_length(i).seconds, ==, 23);
   munit_assert_type(
-      time_t,
+      uint64_t,
+      "lu",
+      get_length(i).seconds,
+      ==,
+      23
+  );
+  munit_assert_type(
+      uint64_t,
       "lu",
       get_length(i).miliseconds,
       ==,
       0
   );
-  munit_assert_type(time_t, "lu", get_fade(i).seconds, ==, 5);
+  munit_assert_type(uint64_t, "lu", get_fade(i).seconds, ==, 5);
   munit_assert_type(
-      time_t,
+      uint64_t,
       "lu",
       get_fade(i).miliseconds,
       ==,
@@ -145,17 +151,23 @@ test_subtune_2 (const MunitParameter params[], void *data)
       "\n"
       "with extras from the PC-88 version."
   );
-  munit_assert_type(time_t, "lu", get_length(i).seconds, ==, 32);
   munit_assert_type(
-      time_t,
+      uint64_t,
+      "lu",
+      get_length(i).seconds,
+      ==,
+      32
+  );
+  munit_assert_type(
+      uint64_t,
       "lu",
       get_length(i).miliseconds,
       ==,
       0
   );
-  munit_assert_type(time_t, "lu", get_fade(i).seconds, ==, 10);
+  munit_assert_type(uint64_t, "lu", get_fade(i).seconds, ==, 10);
   munit_assert_type(
-      time_t,
+      uint64_t,
       "lu",
       get_fade(i).miliseconds,
       ==,
@@ -185,17 +197,23 @@ test_subtune_3 (const MunitParameter params[], void *data)
   assert_string_equal(title, "Pokémon Red & Blue - Intro");
   assert_string_equal(composer, "Junichi Masuda");
   assert_string_equal(comment, "No noise, because I sucked");
-  munit_assert_type(time_t, "lu", get_length(i).seconds, ==, 15);
   munit_assert_type(
-      time_t,
+      uint64_t,
+      "lu",
+      get_length(i).seconds,
+      ==,
+      15
+  );
+  munit_assert_type(
+      uint64_t,
       "lu",
       get_length(i).miliseconds,
       ==,
       0
   );
-  munit_assert_type(time_t, "lu", get_fade(i).seconds, ==, 10);
+  munit_assert_type(uint64_t, "lu", get_fade(i).seconds, ==, 10);
   munit_assert_type(
-      time_t,
+      uint64_t,
       "lu",
       get_fade(i).miliseconds,
       ==,
@@ -228,17 +246,23 @@ test_subtune_4 (const MunitParameter params[], void *data)
       "Rebecca Sugar, Aivi & Surasshu"
   );
   assert_string_equal(comment, "");
-  munit_assert_type(time_t, "lu", get_length(i).seconds, ==, 54);
   munit_assert_type(
-      time_t,
+      uint64_t,
+      "lu",
+      get_length(i).seconds,
+      ==,
+      54
+  );
+  munit_assert_type(
+      uint64_t,
       "lu",
       get_length(i).miliseconds,
       ==,
       0
   );
-  munit_assert_type(time_t, "lu", get_fade(i).seconds, ==, 10);
+  munit_assert_type(uint64_t, "lu", get_fade(i).seconds, ==, 10);
   munit_assert_type(
-      time_t,
+      uint64_t,
       "lu",
       get_fade(i).miliseconds,
       ==,

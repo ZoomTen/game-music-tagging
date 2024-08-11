@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <time.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -10,8 +9,8 @@ extern "C"
 
   typedef struct gmtag_timedef
   {
-    time_t seconds;
-    time_t miliseconds;
+    uint64_t seconds;
+    uint64_t miliseconds;
   } GmTagTimeDef;
 
   typedef struct gmtag_datedef
