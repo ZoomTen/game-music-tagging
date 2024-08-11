@@ -11,25 +11,26 @@
 
 MunitResult test_tags_after_reload (
     const MunitParameter params[],
-    void *data
+    void *user_data
 )
 {
   UNUSED(params);
-  UNUSED(data);
+  UNUSED(user_data);
 
   // simulate reloading tracks
-  tags_from_buffer(tag_init_data);
-  tags_from_buffer(katakis_3d_test);
+  GmTagObject data = tags_from_buffer(tag_init_data);
+  unset_tags(data);
+  data = tags_from_buffer(katakis_3d_test);
 
   for (size_t i = 1; i <= 18; i++)
   {
-    assert_uint64(get_track_num(i), ==, i);
+    assert_uint64(get_track_num(data, i), ==, i);
 
     // check global tags
-    char *album = get_album(i);
-    char *company = get_company(i);
-    char *ripper = get_ripper(i);
-    char *tagger = get_tagger(i);
+    char *album = get_album(data, i);
+    char *company = get_company(data, i);
+    char *ripper = get_ripper(data, i);
+    char *tagger = get_tagger(data, i);
 
     assert_string_equal(album, "Katakis 3D");
     assert_string_equal(company, "Similis");
@@ -41,10 +42,10 @@ MunitResult test_tags_after_reload (
     free(ripper);
     free(tagger);
 
-    assert_uint64(get_date(i).year, ==, 2001);
+    assert_uint64(get_date(data, i).year, ==, 2001);
 
     // check artist
-    char *artist = get_artist(i);
+    char *artist = get_artist(data, i);
     switch (i)
     {
       case 1:
@@ -59,14 +60,14 @@ MunitResult test_tags_after_reload (
     }
     free(artist);
 
-    char *title = get_title(i);
+    char *title = get_title(data, i);
     // check other metadata
     switch (i)
     {
       case 1:
         assert_string_equal(title, "Katakis (Remix)");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 3, 17, 0)
         );
@@ -74,7 +75,7 @@ MunitResult test_tags_after_reload (
       case 2:
         assert_string_equal(title, "Loud 'n Proud");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 53, 0)
         );
@@ -82,7 +83,7 @@ MunitResult test_tags_after_reload (
       case 3:
         assert_string_equal(title, "Flight to Hell");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 1, 18, 0)
         );
@@ -90,7 +91,7 @@ MunitResult test_tags_after_reload (
       case 4:
         assert_string_equal(title, "The Big Thing");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 49, 0)
         );
@@ -98,7 +99,7 @@ MunitResult test_tags_after_reload (
       case 5:
         assert_string_equal(title, "Electrical Motions");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 1, 31, 0)
         );
@@ -106,7 +107,7 @@ MunitResult test_tags_after_reload (
       case 6:
         assert_string_equal(title, "Protected Beat");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 24, 0)
         );
@@ -114,17 +115,17 @@ MunitResult test_tags_after_reload (
       case 7:
         assert_string_equal(title, "Secret Cycles");
         assert_uint64(
-            get_length_of_subtune(i),
+            get_length_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 1, 52, 0)
         );
         assert_uint64(
-            get_fade_length_of_subtune(i),
+            get_fade_length_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 10, 0)
         );
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 2, 2, 0)
         );
@@ -132,7 +133,7 @@ MunitResult test_tags_after_reload (
       case 8:
         assert_string_equal(title, "Radioactive Attack");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 42, 0)
         );
@@ -140,7 +141,7 @@ MunitResult test_tags_after_reload (
       case 9:
         assert_string_equal(title, "Enforcer");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 1, 30, 0)
         );
@@ -148,7 +149,7 @@ MunitResult test_tags_after_reload (
       case 10:
         assert_string_equal(title, "Someone Wanna Party");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 50, 0)
         );
@@ -156,7 +157,7 @@ MunitResult test_tags_after_reload (
       case 11:
         assert_string_equal(title, "Rasit's Spiritual Dreams");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 1, 18, 0)
         );
@@ -164,7 +165,7 @@ MunitResult test_tags_after_reload (
       case 12:
         assert_string_equal(title, "Oriental Danger");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 50, 0)
         );
@@ -172,7 +173,7 @@ MunitResult test_tags_after_reload (
       case 13:
         assert_string_equal(title, "Boomin' Back Katakis");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 4, 1, 0)
         );
@@ -180,7 +181,7 @@ MunitResult test_tags_after_reload (
       case 14:
         assert_string_equal(title, "Master of Universe");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 1, 14, 0)
         );
@@ -188,7 +189,7 @@ MunitResult test_tags_after_reload (
       case 15:
         assert_string_equal(title, "The Impregnable");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 1, 1, 0)
         );
@@ -196,7 +197,7 @@ MunitResult test_tags_after_reload (
       case 16:
         assert_string_equal(title, "30 Seconds to Go...");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 45, 0)
         );
@@ -204,7 +205,7 @@ MunitResult test_tags_after_reload (
       case 17:
         assert_string_equal(title, "Beyond the Stars");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 4, 27, 0)
         );
@@ -212,7 +213,7 @@ MunitResult test_tags_after_reload (
       case 18:
         assert_string_equal(title, "Crush Boom Bang");
         assert_uint64(
-            get_duration_of_subtune(i),
+            get_duration_of_subtune(data, i),
             ==,
             TIME_TO_MS(0, 0, 7, 0)
         );
@@ -224,20 +225,22 @@ MunitResult test_tags_after_reload (
     free(title);
   }
 
+  unset_tags(data);
   return MUNIT_OK;
 }
 
 MunitResult
-test_tag_weirdness (const MunitParameter params[], void *data)
+test_tag_weirdness (const MunitParameter params[], void *user_data)
 {
   UNUSED(params);
-  UNUSED(data);
-
   UNUSED(katakis_3d_test);
+  UNUSED(user_data);
 
   // simulate reloading tracks
-  tags_from_buffer(tag_init_data);
-  tags_from_buffer(test_spec_derps);
+  GmTagObject data = tags_from_buffer(tag_init_data);
+  unset_tags(data);
+  data = tags_from_buffer(test_spec_derps);
+  unset_tags(data);
 
   return MUNIT_OK;
 }

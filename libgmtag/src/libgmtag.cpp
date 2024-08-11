@@ -10,18 +10,14 @@
 
 typedef const char *(*BufOpFunc)(GmTagDef &, const char *);
 
-// map a track number to a GmTagDef
-std::map<uint64_t, GmTagDef> tags;
-
-// "global" tags
-GmTagDef default_tags = {};
-
 // API
-void tags_from_buffer (const char *const buff)
+GmTagObject tags_from_buffer (const char *const buff)
 {
+  GmTagDef default_tags = {};
   static bool tag_handlers_init = false;
   static std::map<std::string, BufOpFunc> tag_handlers;
 
+  GmTagObjectReal *tags = new GmTagObjectReal();
   const char *buff_pointer = buff;
 
   if (!tag_handlers_init)
@@ -45,7 +41,7 @@ void tags_from_buffer (const char *const buff)
     tag_handlers_init = true;
   }
 
-  tags.clear();
+  tags->clear();
   GmTagDef current_tag = GmTagDef{};
   uint64_t track_num = 1;
 
@@ -79,6 +75,7 @@ void tags_from_buffer (const char *const buff)
               // and end of global tags; so save the global
               // tags up to this point.
               default_tags = current_tag;
+              (*tags)[0] = default_tags;
             }
 
             buff_pointer = word_into_buffer(
@@ -142,61 +139,67 @@ void tags_from_buffer (const char *const buff)
         }
 
         if (subtune_number_str.length() > 0)
-        {  // we got a subtune number
-          // let's push the current tags into the list
+        {  // we got a subtune number, let's push the current
+           // tags into the list
           uint64_t subtune_num = std::stoul(subtune_number_str);
 
-          if (tags.count(subtune_num))
-          {  // if a subtune exists, modify its properties
-            GmTagDef prev_tag = tags[subtune_num];
+          // sanity check: subtune numbers must be 1-indexed
+          // subtune 0 is the "default tags"
+          if (subtune_num > 0)
+          {
+            if (tags->count(subtune_num))
+            {  // if a subtune exists, modify its properties
+              GmTagDef prev_tag = (*tags)[subtune_num];
 
-            if (!current_tag.album.empty())
-              prev_tag.album = current_tag.album;
-            if (!current_tag.company.empty())
-              prev_tag.company = current_tag.company;
-            if (!current_tag.publisher.empty())
-              prev_tag.publisher = current_tag.publisher;
-            if (!current_tag.artist.empty())
-              prev_tag.artist = current_tag.artist;
-            if (!current_tag.composer.empty())
-              prev_tag.composer = current_tag.composer;
-            if (!current_tag.sequencer.empty())
-              prev_tag.sequencer = current_tag.sequencer;
-            if (!current_tag.engineer.empty())
-              prev_tag.engineer = current_tag.engineer;
-            // if (current_tag.date) prev_tag.date =
-            // current_tag.date;
-            if (!current_tag.ripper.empty())
-              prev_tag.ripper = current_tag.ripper;
-            if (!current_tag.tagger.empty())
-              prev_tag.tagger = current_tag.tagger;
-            if (!current_tag.title.empty())
-              prev_tag.title = current_tag.title;
-            if (!current_tag.comments.empty())
-              prev_tag.comments = current_tag.comments;
-            if (!current_tag.copyright.empty())
-              prev_tag.copyright = current_tag.copyright;
-            // if (current_tag.length) prev_tag.length =
-            // current_tag.length; if (current_tag.fade)
-            // prev_tag.fade = current_tag.fade;
-            if (current_tag.track)
-              prev_tag.track = current_tag.track;
+              if (!current_tag.album.empty())
+                prev_tag.album = current_tag.album;
+              if (!current_tag.company.empty())
+                prev_tag.company = current_tag.company;
+              if (!current_tag.publisher.empty())
+                prev_tag.publisher = current_tag.publisher;
+              if (!current_tag.artist.empty())
+                prev_tag.artist = current_tag.artist;
+              if (!current_tag.composer.empty())
+                prev_tag.composer = current_tag.composer;
+              if (!current_tag.sequencer.empty())
+                prev_tag.sequencer = current_tag.sequencer;
+              if (!current_tag.engineer.empty())
+                prev_tag.engineer = current_tag.engineer;
+              // if (current_tag.date) prev_tag.date =
+              // current_tag.date;
+              if (!current_tag.ripper.empty())
+                prev_tag.ripper = current_tag.ripper;
+              if (!current_tag.tagger.empty())
+                prev_tag.tagger = current_tag.tagger;
+              if (!current_tag.title.empty())
+                prev_tag.title = current_tag.title;
+              if (!current_tag.comments.empty())
+                prev_tag.comments = current_tag.comments;
+              if (!current_tag.copyright.empty())
+                prev_tag.copyright = current_tag.copyright;
+              // if (current_tag.length) prev_tag.length =
+              // current_tag.length; if (current_tag.fade)
+              // prev_tag.fade = current_tag.fade;
+              if (current_tag.track)
+                prev_tag.track = current_tag.track;
 
-            if (prev_tag.track == 0)
-              prev_tag.track = track_num++;
+              if (prev_tag.track == 0)
+                prev_tag.track = track_num++;
 
-            tags[subtune_num] = prev_tag;
+              (*tags)[subtune_num] = prev_tag;
+            }
+            else
+            {  // otherwise, just add it
+              if (current_tag.track == 0)
+                current_tag.track = track_num++;
+
+              (*tags)[subtune_num] = current_tag;
+            }
+
+            // create new tag
+            current_tag = default_tags;
           }
-          else
-          {  // otherwise, just add it
-            if (current_tag.track == 0)
-              current_tag.track = track_num++;
 
-            tags[subtune_num] = current_tag;
-          }
-
-          // create new tag
-          current_tag = default_tags;
           buff_pointer = skip_current_line(buff_pointer);
         }
         break;
@@ -205,6 +208,12 @@ void tags_from_buffer (const char *const buff)
   }
 
   free(keyword);
+  return static_cast<GmTagObject>(tags);
 }
 
-void unset_tags () { tags.clear(); }
+void unset_tags (GmTagObject handle)
+{
+  GmTagObjectReal *tags = static_cast<GmTagObjectReal *>(handle);
+  tags->clear();
+  delete tags;
+}

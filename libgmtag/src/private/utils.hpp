@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstddef>
+#include <stddef.h>
 
 const char *skip_spaces (const char *);
 const char *skip_current_line (const char *);

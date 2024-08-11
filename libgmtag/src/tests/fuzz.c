@@ -39,8 +39,8 @@ int main (void)
 
   printf("%s", something);
 
-  tags_from_buffer(something);
-  unset_tags();
+  GmTagObject data = tags_from_buffer(something);
+  unset_tags(data);
 
   return 0;
 }

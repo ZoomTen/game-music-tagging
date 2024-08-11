@@ -27,5 +27,4 @@ typedef struct gmtag_def
 // every field has a maximum length of:
 #define MAX_FIELD_LENGTH 256
 
-extern std::map<uint64_t, GmTagDef> tags;
-extern GmTagDef default_tags;
+typedef std::map<uint64_t, GmTagDef> GmTagObjectReal;

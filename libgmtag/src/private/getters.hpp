@@ -2,4 +2,4 @@
 
 #include "./gmtag.hpp"
 
-GmTagDef get_tags_for_subtune (unsigned long subtune);
+GmTagDef get_tags_for_subtune (GmTagObjectReal tags, unsigned long subtune);
