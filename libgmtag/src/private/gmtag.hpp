@@ -4,7 +4,8 @@
 #include <map>
 #include "libgmtag.h"
 
-typedef struct gmtag_def {
+typedef struct gmtag_def
+{
   uint64_t track;
   std::string album;
   std::string company;

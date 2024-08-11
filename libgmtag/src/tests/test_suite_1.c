@@ -6,7 +6,8 @@
 
 #include "./sample_data.h"
 
-void *init_tags (const MunitParameter params[], void *data) {
+void *init_tags (const MunitParameter params[], void *data)
+{
   UNUSED(params);
   UNUSED(data);
 
@@ -14,13 +15,15 @@ void *init_tags (const MunitParameter params[], void *data) {
   return NULL;
 }
 
-void deinit_tags (void *data) {
+void deinit_tags (void *data)
+{
   UNUSED(data);
   unset_tags();
 }
 
 MunitResult
-test_subtune_count (const MunitParameter params[], void *data) {
+test_subtune_count (const MunitParameter params[], void *data)
+{
   UNUSED(params);
   UNUSED(data);
   UNUSED(katakis_3d_test);
@@ -31,7 +34,8 @@ test_subtune_count (const MunitParameter params[], void *data) {
 }
 
 MunitResult
-test_subtune_order (const MunitParameter params[], void *data) {
+test_subtune_order (const MunitParameter params[], void *data)
+{
   UNUSED(params);
   UNUSED(data);
 
@@ -46,7 +50,8 @@ test_subtune_order (const MunitParameter params[], void *data) {
   return MUNIT_OK;
 }
 
-void check_global_tag (void) {
+void check_global_tag (void)
+{
   char *album = get_album(0);
   char *company = get_company(0);
   char *publisher = get_publisher(0);
@@ -79,7 +84,8 @@ void check_global_tag (void) {
 }
 
 MunitResult
-test_subtune_1 (const MunitParameter params[], void *data) {
+test_subtune_1 (const MunitParameter params[], void *data)
+{
   UNUSED(params);
   UNUSED(data);
 
@@ -118,7 +124,8 @@ test_subtune_1 (const MunitParameter params[], void *data) {
 }
 
 MunitResult
-test_subtune_2 (const MunitParameter params[], void *data) {
+test_subtune_2 (const MunitParameter params[], void *data)
+{
   UNUSED(params);
   UNUSED(data);
 
@@ -162,7 +169,8 @@ test_subtune_2 (const MunitParameter params[], void *data) {
 }
 
 MunitResult
-test_subtune_3 (const MunitParameter params[], void *data) {
+test_subtune_3 (const MunitParameter params[], void *data)
+{
   UNUSED(params);
   UNUSED(data);
 
@@ -201,7 +209,8 @@ test_subtune_3 (const MunitParameter params[], void *data) {
 }
 
 MunitResult
-test_subtune_4 (const MunitParameter params[], void *data) {
+test_subtune_4 (const MunitParameter params[], void *data)
+{
   UNUSED(params);
   UNUSED(data);
 

@@ -12,7 +12,8 @@
 MunitResult test_tags_after_reload (
     const MunitParameter params[],
     void *data
-) {
+)
+{
   UNUSED(params);
   UNUSED(data);
 
@@ -20,7 +21,8 @@ MunitResult test_tags_after_reload (
   tags_from_buffer(tag_init_data);
   tags_from_buffer(katakis_3d_test);
 
-  for (size_t i = 1; i <= 18; i++) {
+  for (size_t i = 1; i <= 18; i++)
+  {
     assert_uint64(get_track_num(i), ==, i);
 
     // check global tags
@@ -43,7 +45,8 @@ MunitResult test_tags_after_reload (
 
     // check artist
     char *artist = get_artist(i);
-    switch (i) {
+    switch (i)
+    {
       case 1:
         assert_string_equal(
             artist,
@@ -58,7 +61,8 @@ MunitResult test_tags_after_reload (
 
     char *title = get_title(i);
     // check other metadata
-    switch (i) {
+    switch (i)
+    {
       case 1:
         assert_string_equal(title, "Katakis (Remix)");
         assert_uint64(
@@ -224,7 +228,8 @@ MunitResult test_tags_after_reload (
 }
 
 MunitResult
-test_tag_weirdness (const MunitParameter params[], void *data) {
+test_tag_weirdness (const MunitParameter params[], void *data)
+{
   UNUSED(params);
   UNUSED(data);
 

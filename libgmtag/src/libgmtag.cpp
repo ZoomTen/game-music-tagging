@@ -17,13 +17,15 @@ std::map<uint64_t, GmTagDef> tags;
 GmTagDef default_tags = {};
 
 // API
-void tags_from_buffer (const char *buff) {
+void tags_from_buffer (const char *const buff)
+{
   static bool tag_handlers_init = false;
   static std::map<std::string, BufOpFunc> tag_handlers;
 
   const char *buff_pointer = buff;
 
-  if (!tag_handlers_init) {
+  if (!tag_handlers_init)
+  {
     tag_handlers["track"] = set_track;
     tag_handlers["album"] = set_album;
     tag_handlers["company"] = set_company;
@@ -53,25 +55,28 @@ void tags_from_buffer (const char *buff) {
   char last_sigil = 0;
 
   // while not EOF
-  while (*buff_pointer != '\0') {
+  while (*buff_pointer != '\0')
+  {
     // I assume every iteration starts at the
     // beginning of the line
     buff_pointer = skip_spaces(buff_pointer);
     std::string word;
 
-    switch (*buff_pointer) {
+    switch (*buff_pointer)
+    {
       case '#':
-        // this is an m3u comment. does it contain tags or not?
+      {  // this is an m3u comment. does it contain tags or not?
         buff_pointer++;
         buff_pointer = skip_spaces(buff_pointer);
 
-        switch (current_sigil = *buff_pointer++) {
+        switch (current_sigil = *buff_pointer++)
+        {
           case '@':  // global tag
           case '%':  // local tag
-            if ((current_sigil == '%') && (last_sigil == '@')) {
-              // assume this is where the group of
-              // "global" tags end and where the
-              // "local" tags start, so save the "global"
+          {
+            if ((current_sigil == '%') && (last_sigil == '@'))
+            {  // assumed start of local tags
+              // and end of global tags; so save the global
               // tags up to this point.
               default_tags = current_tag;
             }
@@ -92,11 +97,13 @@ void tags_from_buffer (const char *buff) {
                 [] (unsigned char c) { return std::tolower(c); }
             );
 
-            if (tag_handlers.count(word)) {
+            if (tag_handlers.count(word))
+            {
               buff_pointer =
                   tag_handlers[word](current_tag, buff_pointer);
             }
             break;
+          }
           default:
             break;
         }
@@ -104,12 +111,15 @@ void tags_from_buffer (const char *buff) {
         last_sigil = current_sigil;
         buff_pointer = skip_current_line(buff_pointer);
         break;
+      }
       case '\n':
       case '\r':
+      {  // this must be a new line
         buff_pointer = skip_current_line(buff_pointer);
         break;
+      }
       default:
-        // this must be an m3u entry, attempt to parse it
+      {  // this must be an m3u entry, attempt to parse it
         bool next_is_subtune_number = false;
         std::string subtune_number_str = "";
 
@@ -117,24 +127,27 @@ void tags_from_buffer (const char *buff) {
                (*buff_pointer != '\n') &&
                (*buff_pointer != '\r'))
         {
-          if (*buff_pointer == '?') {
+          if (*buff_pointer == '?')
+          {
             // in case we have titles like:
             // "Where the HELL is Carmen Sandiego???.nsf?4"
             char next_is = *(buff_pointer + 1);
             next_is_subtune_number = is_number(next_is);
-          } else if (next_is_subtune_number) {
+          }
+          else if (next_is_subtune_number)
+          {
             subtune_number_str.push_back(*buff_pointer);
           }
           buff_pointer++;
         }
 
-        if (subtune_number_str.length() > 0) {
-          // we got a subtune number, let's push the
-          // current tags into the list
+        if (subtune_number_str.length() > 0)
+        {  // we got a subtune number
+          // let's push the current tags into the list
           uint64_t subtune_num = std::stoul(subtune_number_str);
 
-          if (tags.count(subtune_num)) {
-            // if a subtune exists, modify its properties
+          if (tags.count(subtune_num))
+          {  // if a subtune exists, modify its properties
             GmTagDef prev_tag = tags[subtune_num];
 
             if (!current_tag.album.empty())
@@ -173,8 +186,9 @@ void tags_from_buffer (const char *buff) {
               prev_tag.track = track_num++;
 
             tags[subtune_num] = prev_tag;
-          } else {
-            // otherwise, just add it
+          }
+          else
+          {  // otherwise, just add it
             if (current_tag.track == 0)
               current_tag.track = track_num++;
 
@@ -186,6 +200,7 @@ void tags_from_buffer (const char *buff) {
           buff_pointer = skip_current_line(buff_pointer);
         }
         break;
+      }
     }
   }
 

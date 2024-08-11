@@ -67,6 +67,7 @@ static const MunitSuite suite = {
     MUNIT_SUITE_OPTION_NONE
 };
 
-int main (int argc, char **argv) {
+int main (int argc, char **argv)
+{
   return munit_suite_main(&suite, "munit", argc, argv);
 }
