@@ -138,6 +138,7 @@ when defined(test):
       container: TagContainer
       curtag: TagData
       curtagNum = 0
+      trackNum = 1
 
     for line in ($buffer).splitLines():
       var trimmed = line.strip()
@@ -216,9 +217,10 @@ when defined(test):
         else:
           let
             numStr = trimmed[qmarkNumberBeginsAt + 1 ..^ 1]
-            trkNum = numStr.parseInt()
-          curtag.track = trkNum
-          container[trkNum.uint64] = curtag
+            subtuneNum = numStr.parseInt()
+          curtag.track = trackNum
+          trackNum += 1
+          container[subtuneNum.uint64] = curtag
           # reset to "global" tags
           curtag = container[0]
 
