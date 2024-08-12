@@ -6,22 +6,24 @@ import ./datatypes
 when defined(test):
   import pretty
   proc testParse*(buffer: string): void =
-    var container: TagContainer
-    var curtag: TagData
+    var
+      container: TagContainer
+      curtag: TagData
+      curtagNum = 0
+
     for line in ($buffer).splitLines():
       var trimmed = line.strip()
+
       if len(trimmed) == 0:
-        continue
+        continue # skip
+
+      debugEcho trimmed
+
       if trimmed[0] == '#': # is comment, try and process it
         trimmed = trimmed[1 ..^ 1].strip()
-        var forSubtune = (
-          case trimmed[0]
-          of '@': 0
-          of '%': 1
-          else: -1
-        )
         var command: string
         let x = trimmed[1 ..^ 1].parseUntil(command, ' ') + 1
+
         case command
         of "album":
           curtag.album = trimmed[x ..^ 1].strip()
@@ -49,9 +51,39 @@ when defined(test):
           curtag.copyright = trimmed[x ..^ 1].strip()
         else:
           discard
-        debugEcho trimmed
-    print(curtag)
-    print(container)
+
+        if trimmed[0] == '@':
+          container[0] = curtag
+      else:
+        # this must be a m3u entry. Assuming the subtune number
+        # is always at the end, we can work backwards
+        var
+          qmarkNumberBeginsAt = -1
+          numberEncountered = false
+        for i in countdown(len(trimmed) - 1, 0):
+          case trimmed[i]
+          of '0' .. '9':
+            if not numberEncountered:
+              numberEncountered = true
+          of '?':
+            if numberEncountered:
+              qmarkNumberBeginsAt = i
+          else:
+            discard
+          if qmarkNumberBeginsAt > 0:
+            break
+        debugEcho "subtune id begins at ", $qmarkNumberBeginsAt
+        if qmarkNumberBeginsAt > 0:
+          let
+            numStr = trimmed[qmarkNumberBeginsAt + 1 ..^ 1]
+            trkNum = numStr.parseInt()
+          print(trkNum)
+          curtag.track = trkNum
+          container[trkNum.uint64] = curtag
+          curtag = container[0]
+
+    for i in 0 .. 5:
+      print(container[i.uint64])
 
 proc tags_from_buffer(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynlib.} =
   let newTags = cast[ptr TagContainer](alloc0Impl(sizeof(TagContainer)))
