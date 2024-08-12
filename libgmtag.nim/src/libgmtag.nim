@@ -5,8 +5,92 @@ import ./datatypes
 # All of these are TODO
 when defined(test):
   import pretty
+
+  proc toTime(buffer: string): TimeDef =
+    var r = TimeDef()
+    type
+      tkKind = enum
+        Nothing
+        Number
+        Colon
+        Dot
+
+      token = object
+        content: string
+        kind: tkKind
+
+    # Tokenize the string
+    var
+      tokens: seq[token] = @[]
+      newToken: token
+    for i in buffer:
+      case i
+      of '0' .. '9':
+        newToken.kind = Number
+        newToken.content.add(i)
+      of ':':
+        if newToken.kind != Nothing:
+          tokens.add(newToken)
+        tokens.add(token(content: $i, kind: Colon))
+        newToken = token()
+      of '.':
+        if newToken.kind != Nothing:
+          tokens.add(newToken)
+        tokens.add(token(content: $i, kind: Dot))
+        newToken = token()
+      else:
+        discard
+    tokens.add(newToken)
+    # Ad-hoc lexer... :(
+    case len(tokens)
+    of 1:
+      # SS
+      if tokens[0].kind == Number:
+        r.seconds = tokens[0].content.parseInt().uint64
+    of 3:
+      case tokens[1].kind
+      of Dot:
+        # SS.mmm
+        r.seconds = tokens[0].content.parseInt().uint64
+        r.miliseconds = tokens[2].content.parseInt().uint64
+      of Colon:
+        # MM:SS
+        r.seconds =
+          ((tokens[0].content.parseInt() * 60) + (tokens[2].content.parseInt())).uint64
+      else:
+        discard
+    of 5:
+      if tokens[1].kind == Colon:
+        case tokens[3].kind
+        of Dot:
+          # MM:SS.mmm
+          r.seconds = (
+            (tokens[0].content.parseInt() * 60) + (tokens[2].content.parseInt())
+          ).uint64
+          r.miliseconds = tokens[4].content.parseInt().uint64
+        of Colon:
+          # HH:MM:SS
+          r.seconds = (
+            (tokens[0].content.parseInt() * 3600) + (tokens[2].content.parseInt() * 60) +
+            (tokens[4].content.parseInt())
+          ).uint64
+        else:
+          discard
+    of 7:
+      if tokens[1].kind == Colon and tokens[3].kind == Colon and tokens[5].kind == Dot:
+        # HH:MM:SS.mmm
+        r.seconds = (
+          (tokens[0].content.parseInt() * 3600) + (tokens[2].content.parseInt() * 60) +
+          (tokens[4].content.parseInt())
+        ).uint64
+        r.miliseconds = tokens[6].content.parseInt().uint64
+    else:
+      discard
+    print(tokens)
+    return r
+
   proc toDate(buffer: string): DateDef =
-    result = DateDef()
+    var r = DateDef()
     type which = enum
       Year
       Month
@@ -36,18 +120,18 @@ when defined(test):
       else:
         discard
     if len(yyyy) > 0:
-      result.year = yyyy.parseInt().uint64
+      r.year = yyyy.parseInt().uint64
     if len(mm) in 1 .. 2:
-      result.month = mm.parseInt().uint8
-      if result.month > 12:
+      r.month = mm.parseInt().uint8
+      if r.month > 12:
         # error here
         discard
     if len(dd) in 1 .. 2:
-      result.day = dd.parseInt().uint8
-      if result.day > 31:
+      r.day = dd.parseInt().uint8
+      if r.day > 31:
         # error here
         discard
-    return result
+    return r
 
   proc testParse*(buffer: string): void =
     var
@@ -97,6 +181,10 @@ when defined(test):
           curtag.copyright = content
         of "date":
           curtag.date = content.toDate()
+        of "length":
+          curtag.length = content.toTime()
+        of "fade":
+          curtag.fade = content.toTime()
         else:
           discard
         # may not be the most efficient as it reassigns
