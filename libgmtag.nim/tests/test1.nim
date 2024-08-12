@@ -67,16 +67,25 @@ suite "Katakis 3D m3u":
         check tags.getLengthOfSubtune(7'u64) == timeToMs(0, 1, 52, 0)
         check tags.getFadeLengthOfSubtune(7'u64) == timeToMs(0, 0, 10, 0)
 
+  test "playlist order":
+    let order = tags.getSubtuneOrder()
+    for i in 1 .. order[].count:
+      check order[].playlist[][i - 1] == i
+
   teardown:
     tags.unsetTags()
 
 suite "Badly-formatted m3u":
   setup:
     const m3uStr = staticRead("samples/weird.m3u")
+    var tags = tagsFromBuffer(m3uStr)
 
-  test "parse and read":
-    skip()
-    #debugEcho m3uStr
+  test "playlist order":
+    let
+      order = tags.getSubtuneOrder()
+      expected = [1'u64, 2'u64, 3'u64, 6'u64]
+    for i in 1 .. order[].count:
+      check order[].playlist[][i - 1] == expected[i - 1]
 
 suite "Spec check":
   setup:

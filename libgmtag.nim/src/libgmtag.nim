@@ -236,7 +236,27 @@ proc get_subtune_count*(handle: ptr TagContainer): uint64 {.cdecl, exportc, dynl
 proc get_subtune_order*(
     handle: ptr TagContainer
 ): ptr OrderDef {.cdecl, exportc, dynlib.} =
-  return nil
+  let p = cast[ptr OrderDef](alloc0Impl(sizeof(OrderDef)))
+  let
+    container = handle[]
+    containerSize = (
+      let x = len(container)
+      if x < 1:
+        0
+      else:
+        x - 1
+    ).uint64
+  p[].count = containerSize
+  if containerSize > 1:
+    let orderArray = cast[ptr UncheckedArray[uint64]](alloc0Impl(
+      sizeof(uint64) * (len(container) - 1)
+    ))
+    for subtuneId in container.keys:
+      let trackNum = container[subtuneId].track
+      if trackNum > 0:
+        orderArray[trackNum - 1] = subtuneId
+    p[].playlist = orderArray
+  return p
 
 proc get_length_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
