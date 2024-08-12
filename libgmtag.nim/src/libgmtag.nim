@@ -249,12 +249,11 @@ proc get_subtune_order*(
   p[].count = containerSize
   if containerSize > 1:
     let orderArray = cast[ptr UncheckedArray[uint64]](alloc0Impl(
-      sizeof(uint64) * (len(container) - 1)
+      sizeof(uint64) * (len(container))
     ))
     for subtuneId in container.keys:
       let trackNum = container[subtuneId].track
-      if trackNum > 0:
-        orderArray[trackNum - 1] = subtuneId
+      orderArray[trackNum] = subtuneId
     p[].playlist = orderArray
   return p
 

@@ -69,8 +69,8 @@ suite "Katakis 3D m3u":
 
   test "playlist order":
     let order = tags.getSubtuneOrder()
-    for i in 1 .. order[].count:
-      check order[].playlist[][i - 1] == i
+    for i in 0 .. order[].count:
+      check order[].playlist[][i] == i
 
   teardown:
     tags.unsetTags()
@@ -83,9 +83,9 @@ suite "Badly-formatted m3u":
   test "playlist order":
     let
       order = tags.getSubtuneOrder()
-      expected = [1'u64, 2'u64, 3'u64, 6'u64]
-    for i in 1 .. order[].count:
-      check order[].playlist[][i - 1] == expected[i - 1]
+      expected = [0'u64, 1'u64, 2'u64, 3'u64, 6'u64]
+    for i in 0 .. order[].count:
+      check order[].playlist[][i] == expected[i]
 
 suite "Spec check":
   setup:
