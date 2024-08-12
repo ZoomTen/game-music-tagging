@@ -264,60 +264,79 @@ proc get_duration_of_subtune*(
     return -1
   return stLen + stFadeLen
 
+proc makeCopyOf(s: string): cstring =
+  ## The original C++ -> C API uses strdup() to hand out
+  ## copies of the string so that whoever calls it can keep it
+  ## when the tag handler is destroyed, I might as well
+  ## emulate that here.
+  let n: cstring = cast[cstring](alloc0Impl(len(s) + 1))
+  cast[pointer](n).copyMem(s[0].addr, len(s))
+  return n
+
 proc get_album*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].album.cstring)
+  return (if handle == nil: nil else: handle[][subtune].album.makeCopyOf())
 
 proc get_company*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].company.cstring)
+  return (if handle == nil: nil else: handle[][subtune].company.makeCopyOf())
 
 proc get_publisher*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].publisher.cstring)
+  return (if handle == nil: nil
+  else: handle[][subtune].publisher.makeCopyOf()
+  )
 
 proc get_artist*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].artist.cstring)
+  return (if handle == nil: nil else: handle[][subtune].artist.makeCopyOf())
 
 proc get_composer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].composer.cstring)
+  return (if handle == nil: nil
+  else: handle[][subtune].composer.makeCopyOf()
+  )
 
 proc get_sequencer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].sequencer.cstring)
+  return (if handle == nil: nil
+  else: handle[][subtune].sequencer.makeCopyOf()
+  )
 
 proc get_arranger*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].arranger.cstring)
+  return (if handle == nil: nil
+  else: handle[][subtune].arranger.makeCopyOf()
+  )
 
 proc get_engineer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].engineer.cstring)
+  return (if handle == nil: nil
+  else: handle[][subtune].engineer.makeCopyOf()
+  )
 
 proc get_ripper*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].ripper.cstring)
+  return (if handle == nil: nil else: handle[][subtune].ripper.makeCopyOf())
 
 proc get_tagger*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].tagger.cstring)
+  return (if handle == nil: nil else: handle[][subtune].tagger.makeCopyOf())
 
 proc get_title*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].title.cstring)
+  return (if handle == nil: nil else: handle[][subtune].title.makeCopyOf())
 
 proc get_comment*(
     handle: ptr TagContainer, subtune: uint64
@@ -328,7 +347,9 @@ proc get_comment*(
 proc get_copyright*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].copyright.cstring)
+  return (if handle == nil: nil
+  else: handle[][subtune].copyright.makeCopyOf()
+  )
 
 proc get_track_num*(
     handle: ptr TagContainer, subtune: uint64
