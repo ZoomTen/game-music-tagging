@@ -35,7 +35,7 @@ libgmtag_includes = include_directories('include')
 
 test_includes = include_directories('include', 'include/tests')
 
-fuzz_includes = include_directories('include', 'include/fuzz')
+fuzz_includes = include_directories('include')
 
 libgmtag = static_library(
     'gmtag',
