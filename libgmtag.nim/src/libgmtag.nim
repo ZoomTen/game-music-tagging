@@ -147,7 +147,7 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
         contentBeginAt = trimmed[1 ..^ 1].parseUntil(command, ' ') + 1
         content = trimmed[contentBeginAt ..^ 1].strip()
 
-      case command
+      case command.toLowerAscii()
       of "album":
         curtag.album = content
       of "artist":
