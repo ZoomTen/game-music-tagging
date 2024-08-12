@@ -7,7 +7,7 @@ switch("threads", "off")
 if projectPath() == thisDir() / "src" / "libgmtag.nim" :
   switch("app", "staticlib")
   switch("define", "nimPreviewSlimSystem")
-  switch("define", "release")
+  switch("define", "danger")
   switch("panics", "on")
   switch("nimcache", "/mnt/scrapdisk/aaaa")
 else:
