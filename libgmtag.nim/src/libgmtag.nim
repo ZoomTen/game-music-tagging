@@ -213,7 +213,10 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
         let
           numStr = trimmed[qmarkNumberBeginsAt + 1 ..^ 1]
           subtuneNum = numStr.parseInt()
-        curtag.track = trackNum
+        if customTrackNum > -1:
+          curtag.track = customTrackNum
+        else:
+          curtag.track = trackNum
         trackNum += 1
         newTags[][subtuneNum.uint64] = curtag
         # reset to "global" tags
@@ -222,10 +225,13 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
 
 proc unset_tags*(handle: ptr TagContainer): void {.cdecl, exportc, dynlib.} =
   # Zero out the memory before deallocating it
-  handle[].`=destroy`()
-  dealloc(handle)
+  if handle != nil:
+    handle[].`=destroy`()
+    dealloc(handle)
 
 proc get_subtune_count*(handle: ptr TagContainer): uint64 {.cdecl, exportc, dynlib.} =
+  if handle == nil:
+    return 0
   let subtuneCount = len(handle[])
   case subtuneCount
   of 0:
@@ -236,6 +242,8 @@ proc get_subtune_count*(handle: ptr TagContainer): uint64 {.cdecl, exportc, dynl
 proc get_subtune_order*(
     handle: ptr TagContainer
 ): ptr OrderDef {.cdecl, exportc, dynlib.} =
+  if handle == nil:
+    return nil
   let p = cast[ptr OrderDef](alloc0Impl(sizeof(OrderDef)))
   let
     container = handle[]
