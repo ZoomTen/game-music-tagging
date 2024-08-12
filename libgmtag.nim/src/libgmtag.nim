@@ -5,6 +5,50 @@ import ./datatypes
 # All of these are TODO
 when defined(test):
   import pretty
+  proc toDate(buffer: string): DateDef =
+    result = DateDef()
+    type which = enum
+      Year
+      Month
+      Day
+
+    var
+      atMode: which = Year
+      yyyy: string
+      mm: string
+      dd: string
+      dumpTo = yyyy.addr
+
+    for i in buffer:
+      case i
+      of '0' .. '9':
+        dumpTo[].add(i)
+      of '-':
+        case atMode
+        of Year:
+          dumpTo = mm.addr
+          atMode = Month
+        of Month:
+          dumpTo = dd.addr
+          atMode = Day
+        else:
+          discard
+      else:
+        discard
+    if len(yyyy) > 0:
+      result.year = yyyy.parseInt().uint64
+    if len(mm) in 1 .. 2:
+      result.month = mm.parseInt().uint8
+      if result.month > 12:
+        # error here
+        discard
+    if len(dd) in 1 .. 2:
+      result.day = dd.parseInt().uint8
+      if result.day > 31:
+        # error here
+        discard
+    return result
+
   proc testParse*(buffer: string): void =
     var
       container: TagContainer
@@ -19,44 +63,49 @@ when defined(test):
 
       debugEcho trimmed
 
-      if trimmed[0] == '#': # is comment, try and process it
+      if trimmed[0] == '#': # a comment, this is what we want
         trimmed = trimmed[1 ..^ 1].strip()
         var command: string
-        let x = trimmed[1 ..^ 1].parseUntil(command, ' ') + 1
+        let
+          contentBeginAt = trimmed[1 ..^ 1].parseUntil(command, ' ') + 1
+          content = trimmed[contentBeginAt ..^ 1].strip()
 
         case command
         of "album":
-          curtag.album = trimmed[x ..^ 1].strip()
+          curtag.album = content
         of "artist":
-          curtag.artist = trimmed[x ..^ 1].strip()
+          curtag.artist = content
         of "title":
-          curtag.title = trimmed[x ..^ 1].strip()
+          curtag.title = content
         of "company":
-          curtag.company = trimmed[x ..^ 1].strip()
+          curtag.company = content
         of "publisher":
-          curtag.publisher = trimmed[x ..^ 1].strip()
+          curtag.publisher = content
         of "composer":
-          curtag.composer = trimmed[x ..^ 1].strip()
+          curtag.composer = content
         of "arranger":
-          curtag.arranger = trimmed[x ..^ 1].strip()
+          curtag.arranger = content
         of "sequencer":
-          curtag.sequencer = trimmed[x ..^ 1].strip()
+          curtag.sequencer = content
         of "engineer":
-          curtag.engineer = trimmed[x ..^ 1].strip()
+          curtag.engineer = content
         of "ripper":
-          curtag.ripper = trimmed[x ..^ 1].strip()
+          curtag.ripper = content
         of "tagger":
-          curtag.tagger = trimmed[x ..^ 1].strip()
+          curtag.tagger = content
         of "copyright":
-          curtag.copyright = trimmed[x ..^ 1].strip()
+          curtag.copyright = content
+        of "date":
+          curtag.date = content.toDate()
         else:
           discard
-
+        # may not be the most efficient as it reassigns
+        # everytime, but it gets the job done
         if trimmed[0] == '@':
           container[0] = curtag
-      else:
-        # this must be a m3u entry. Assuming the subtune number
-        # is always at the end, we can work backwards
+      else: # a m3u entry
+        # Assuming the subtune number is always at the end,
+        # we can work backwards
         var
           qmarkNumberBeginsAt = -1
           numberEncountered = false
@@ -71,15 +120,18 @@ when defined(test):
           else:
             discard
           if qmarkNumberBeginsAt > 0:
+            # this is a "valid" line, so don't process further
             break
-        debugEcho "subtune id begins at ", $qmarkNumberBeginsAt
-        if qmarkNumberBeginsAt > 0:
+        if qmarkNumberBeginsAt < 0:
+          # error here
+          discard
+        else:
           let
             numStr = trimmed[qmarkNumberBeginsAt + 1 ..^ 1]
             trkNum = numStr.parseInt()
-          print(trkNum)
           curtag.track = trkNum
           container[trkNum.uint64] = curtag
+          # reset to "global" tags
           curtag = container[0]
 
     for i in 0 .. 5:
