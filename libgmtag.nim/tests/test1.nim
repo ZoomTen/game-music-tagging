@@ -7,19 +7,24 @@
 
 import unittest2
 import libgmtag
+import pretty
 
 suite "Katakis 3D m3u":
   setup:
     const m3uStr = staticRead("samples/katakis_3d.m3u")
-  
+    var tags: ptr TagContainer
+
   test "parse and read":
     skip()
-    testParse(m3uStr)
+    tags = tagsFromBuffer(m3uStr)
+  
+  teardown:
+    tags.unsetTags()
 
 suite "Badly-formatted m3u":
   setup:
     const m3uStr = staticRead("samples/weird.m3u")
-  
+
   test "parse and read":
     skip()
     #debugEcho m3uStr
@@ -27,7 +32,7 @@ suite "Badly-formatted m3u":
 suite "Spec check":
   setup:
     const m3uStr = staticRead("samples/spectest.m3u")
-  
+
   test "parse and read":
     skip()
     #debugEcho m3uStr
