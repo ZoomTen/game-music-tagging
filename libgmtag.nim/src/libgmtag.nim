@@ -178,6 +178,9 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
         curtag.length = content.toTime()
       of "fade":
         curtag.fade = content.toTime()
+      of "comment":
+        # TODO
+        discard
       else:
         discard
       # may not be the most efficient as it reassigns
@@ -222,7 +225,7 @@ proc unset_tags*(handle: ptr TagContainer): void {.cdecl, exportc, dynlib.} =
   handle[].`=destroy`()
   dealloc(handle)
 
-proc get_subtune_count(handle: ptr TagContainer): uint64 {.cdecl, exportc, dynlib.} =
+proc get_subtune_count*(handle: ptr TagContainer): uint64 {.cdecl, exportc, dynlib.} =
   let subtuneCount = len(handle[])
   case subtuneCount
   of 0:
@@ -230,28 +233,28 @@ proc get_subtune_count(handle: ptr TagContainer): uint64 {.cdecl, exportc, dynli
   else:
     return subtuneCount.uint64 - 1
 
-proc get_subtune_order(
+proc get_subtune_order*(
     handle: ptr TagContainer
 ): ptr OrderDef {.cdecl, exportc, dynlib.} =
   return nil
 
-proc get_length_of_subtune(
+proc get_length_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
 ): int64 {.cdecl, exportc, dynlib.} =
-  if subtune > handle.get_subtune_count():
+  if subtune > handle.get_subtune_count() or handle == nil:
     return -1
   let tagInfo = handle[][subtune]
   return ((tagInfo.length.seconds * 1000) + tagInfo.length.miliseconds).int64
 
-proc get_fade_length_of_subtune(
+proc get_fade_length_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
 ): int64 {.cdecl, exportc, dynlib.} =
-  if subtune > handle.get_subtune_count():
+  if subtune > handle.get_subtune_count() or handle == nil:
     return -1
   let tagInfo = handle[][subtune]
   return ((tagInfo.fade.seconds * 1000) + tagInfo.fade.miliseconds).int64
 
-proc get_duration_of_subtune(
+proc get_duration_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
 ): int64 {.cdecl, exportc, dynlib.} =
   let
@@ -261,87 +264,88 @@ proc get_duration_of_subtune(
     return -1
   return stLen + stFadeLen
 
-proc get_album(
+proc get_album*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].album.cstring)
 
-proc get_company(
+proc get_company*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].company.cstring)
 
-proc get_publisher(
+proc get_publisher*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].publisher.cstring)
 
-proc get_artist(
+proc get_artist*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].artist.cstring)
 
-proc get_composer(
+proc get_composer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].composer.cstring)
 
-proc get_sequencer(
+proc get_sequencer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].sequencer.cstring)
 
-proc get_arranger(
+proc get_arranger*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].arranger.cstring)
 
-proc get_engineer(
+proc get_engineer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].engineer.cstring)
 
-proc get_ripper(
+proc get_ripper*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].ripper.cstring)
 
-proc get_tagger(
+proc get_tagger*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].tagger.cstring)
 
-proc get_title(
+proc get_title*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].title.cstring)
 
-proc get_comment(
+proc get_comment*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
+  # TODO
   return cstring""
 
-proc get_copyright(
+proc get_copyright*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].copyright.cstring)
 
-proc get_track_num(
+proc get_track_num*(
     handle: ptr TagContainer, subtune: uint64
 ): uint64 {.cdecl, exportc, dynlib.} =
-  return 0
+  return (if handle == nil: 0 else: handle[][subtune].track.uint64)
 
-proc get_date(
+proc get_date*(
     handle: ptr TagContainer, subtune: uint64
 ): DateDef {.cdecl, exportc, dynlib.} =
-  return DateDef()
+  return (if handle == nil: DateDef() else: handle[][subtune].date)
 
-proc get_length(
+proc get_length*(
     handle: ptr TagContainer, subtune: uint64
 ): TimeDef {.cdecl, exportc, dynlib.} =
-  return TimeDef()
+  return (if handle == nil: TimeDef() else: handle[][subtune].length)
 
-proc get_fade(
+proc get_fade*(
     handle: ptr TagContainer, subtune: uint64
 ): TimeDef {.cdecl, exportc, dynlib.} =
-  return TimeDef()
+  return (if handle == nil: TimeDef() else: handle[][subtune].fade)
