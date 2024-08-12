@@ -44,12 +44,20 @@ libgmtag = static_library(
     override_options: ['optimization=3'],
 )
 
+cc = meson.get_compiler('c')
+
+libgmtag_nim = cc.find_library(
+    'libgmtag', required: true, dirs: [
+        meson.current_source_dir() + '/../libgmtag.nim'
+    ]
+)
+
 executable(
     'libgmtag_test',
     test_sources,
     link_with: libgmtag,
     include_directories: [libgmtag_includes, test_includes],
-    dependencies: munit,
+    dependencies: [munit],
 )
 
 executable(
@@ -58,3 +66,18 @@ executable(
     link_with: libgmtag,
     include_directories: [libgmtag_includes, fuzz_includes],
 )
+
+executable(
+    'libgmtag.nim_test',
+    test_sources,
+    include_directories: [libgmtag_includes, test_includes],
+    dependencies: [munit, libgmtag_nim],
+)
+
+executable(
+    'libgmtag.nim_fuzz',
+    fuzz_sources,
+    include_directories: [libgmtag_includes, fuzz_includes],
+    dependencies: [libgmtag_nim],
+)
+
