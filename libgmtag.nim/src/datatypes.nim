@@ -23,4 +23,4 @@ type
     date*: DateDef
     length*, fade*: TimeDef
 
-  TagContainer* = Table[uint64, TagData]
+  TagContainer* = OrderedTable[uint64, TagData]

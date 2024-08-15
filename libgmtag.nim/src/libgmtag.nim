@@ -261,14 +261,15 @@ proc get_subtune_order*(
       else:
         x - 1
     ).uint64
+  var i = 0
   p[].count = containerSize
   if containerSize > 1:
     let orderArray = cast[ptr UncheckedArray[uint64]](alloc0Impl(
       sizeof(uint64) * (len(container))
     ))
     for subtuneId in container.keys:
-      let trackNum = container[subtuneId].track
-      orderArray[trackNum] = subtuneId
+      orderArray[i] = subtuneId
+      i += 1
     p[].playlist = orderArray
   return p
 
@@ -375,7 +376,6 @@ proc get_title*(
 proc get_comment*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  # TODO
   return (if handle == nil: nil else: handle[][subtune].comments.makeCopyOf())
 
 proc get_copyright*(
