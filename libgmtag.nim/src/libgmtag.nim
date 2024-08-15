@@ -133,7 +133,9 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
   var
     curtag: TagData
     trackNum = 1
-
+    commentBuffer: seq[string] = @[]
+    customTrackNum = -1
+  
   for line in ($buffer).splitLines():
     var trimmed = line.strip()
 
@@ -178,9 +180,13 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
         curtag.length = content.toTime()
       of "fade":
         curtag.fade = content.toTime()
+      of "track":
+        customTrackNum = content.parseInt()
       of "comment":
-        # TODO
-        discard
+        commentBuffer.add(content)
+        if len(curtag.comments) > 0:
+          curtag.comments.add("\n")
+        curtag.comments.add(content)
       else:
         discard
       # may not be the most efficient as it reassigns
@@ -215,9 +221,10 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
           subtuneNum = numStr.parseInt()
         if customTrackNum > -1:
           curtag.track = customTrackNum
+          customTrackNum = -1
         else:
           curtag.track = trackNum
-        trackNum += 1
+          trackNum += 1
         newTags[][subtuneNum.uint64] = curtag
         # reset to "global" tags
         curtag = newTags[][0]
@@ -369,7 +376,7 @@ proc get_comment*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
   # TODO
-  return cstring""
+  return (if handle == nil: nil else: handle[][subtune].comments.makeCopyOf())
 
 proc get_copyright*(
     handle: ptr TagContainer, subtune: uint64
