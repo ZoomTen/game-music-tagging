@@ -346,7 +346,8 @@ proc makeCopyOf(s: string): cstring =
   ## when the tag handler is destroyed, I might as well
   ## emulate that here.
   if len(s) < 1:
-    return nil
+    # if there's nothing, then return an empty string literal
+    return cast[cstring](alloc0Impl(1))
   let n: cstring = cast[cstring](alloc0Impl(len(s) + 1))
   cast[pointer](n).copyMem(s[0].addr, len(s))
   return n
