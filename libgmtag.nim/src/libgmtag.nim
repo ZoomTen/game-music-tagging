@@ -129,7 +129,8 @@ proc toDate(buffer: string): DateDef =
   return r
 
 proc mergeTags(a: var TagData, b: TagData): void =
-  a.track = b.track
+  if b.track > 0:
+    a.track = b.track
   if b.album.len > 0:
     a.album = b.album
   if b.company.len > 0:
@@ -259,8 +260,9 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
           curtag.track = customTrackNum
           customTrackNum = -1
         else:
-          curtag.track = trackNum
-          trackNum += 1
+          if subtuneNum.uint64 notIn newTags[]:
+            curtag.track = trackNum
+            trackNum += 1
         if subtuneNum.uint64 in newTags[]:
           newTags[][subtuneNum.uint64].mergeTags(curtag)
         else:
