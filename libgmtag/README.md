@@ -71,12 +71,11 @@ typedef struct gmtag_datedef
 } GmTagDateDef;</pre>
     </p>
     </dd>
-    <dt><code><i>GmTagDateDef</i> <b>get_&#x24e8;</b> (<i>GmTagObject</i> <b>handle</b>, <i>unsigned long</i> <b>subtune</b>)</code></dt>
+    <dt><code><i>GmTagTimeDef</i> <b>get_&#x24e8;</b> (<i>GmTagObject</i> <b>handle</b>, <i>unsigned long</i> <b>subtune</b>)</code></dt>
     <dd>
     <p>
         Where &#x24e8; is one of:
         <ul>
-            <li>date</li>
             <li>length</li>
             <li>fade</li>
         </ul>
