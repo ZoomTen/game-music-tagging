@@ -837,3 +837,10 @@ Like this document, all of them are works in progress. They may not yet conform 
 * [Fork of Audacious Console Music plugin with !tags.m3u support](https://github.com/ZoomTen/audacious-plugin-gme/tree/tags-m3u)
   * Added on top of the updates to libgme.
 * [Support in Zumi's gbstools](https://gitgud.io/zumi-gbs/hcs/gbstools/-/blob/master/gbsdist.py)
+
+## Reference implementation
+
+[This repository](https://github.com/ZoomTen/game-music-tagging) currently contains two reference implementations for reading files that conform to this spec:
+
+1. **C++**: Can be compiled alongside a C++ project that wants to add support for this spec, or compiled as a (static or dynamic) library to link with any project. This implementation targets **C++11**.
+2. **Nim**: Can be imported as a module in a Nim project that wants to add support for this spec (with caveats), or compiled as a (static or dynamic) library to link with any project. This implementation is currently written and tested for Nim **v2.0.4**.
