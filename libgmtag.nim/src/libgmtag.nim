@@ -128,6 +128,42 @@ proc toDate(buffer: string): DateDef =
       discard
   return r
 
+proc mergeTags(a: var TagData, b: TagData): void =
+  a.track = b.track
+  if b.album.len > 0:
+    a.album = b.album
+  if b.company.len > 0:
+    a.company = b.company
+  if b.publisher.len > 0:
+    a.publisher = b.publisher
+  if b.artist.len > 0:
+    a.artist = b.artist
+  if b.composer.len > 0:
+    a.composer = b.composer
+  if b.arranger.len > 0:
+    a.arranger = b.arranger
+  if b.sequencer.len > 0:
+    a.sequencer = b.sequencer
+  if b.engineer.len > 0:
+    a.engineer = b.engineer
+  if b.ripper.len > 0:
+    a.ripper = b.ripper
+  if b.tagger.len > 0:
+    a.tagger = b.tagger
+  if b.title.len > 0:
+    a.title = b.title
+  if b.comments.len > 0:
+    a.comments = b.comments
+  if b.copyright.len > 0:
+    a.copyright = b.copyright
+  if b.date.day > 0 or b.date.month > 0 or b.date.year > 0:
+    a.date = b.date
+  if b.length.seconds > 0 or b.length.miliseconds > 0:
+    a.length = b.length
+  if b.fade.seconds > 0 or b.fade.miliseconds > 0:
+    a.fade = b.fade
+  discard
+
 proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynlib.} =
   let newTags = cast[ptr TagContainer](alloc0Impl(sizeof(TagContainer)))
   var
@@ -225,7 +261,10 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
         else:
           curtag.track = trackNum
           trackNum += 1
-        newTags[][subtuneNum.uint64] = curtag
+        if subtuneNum.uint64 in newTags[]:
+          newTags[][subtuneNum.uint64].mergeTags(curtag)
+        else:
+          newTags[][subtuneNum.uint64] = curtag
         # reset to "global" tags
         curtag = newTags[][0]
   return newTags
