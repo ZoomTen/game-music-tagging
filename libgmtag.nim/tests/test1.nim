@@ -80,17 +80,70 @@ suite "Badly-formatted m3u":
     const m3uStr = staticRead("samples/weird.m3u")
     var tags = tagsFromBuffer(m3uStr)
 
-  test "playlist order":
+  test "album":
+    for i in [0, 1, 2, 3, 6]:
+      check tags.getAlbum(i.uint64) == cstring"Zumi's GB Music Engine v1"
+
+  test "company":
+    for i in [0, 1, 2, 3, 6]:
+      check tags.getCompany(i.uint64) == cstring"Zumi"
+
+  test "playlist order and track number":
     let
       order = tags.getSubtuneOrder()
-      expected = [0'u64, 1'u64, 2'u64, 3'u64, 6'u64]
-    for i in 0 .. order[].count:
-      check order[].playlist[][i] == expected[i]
+      count = tags.getSubtuneCount()
+      expected =
+        @[
+          (0'u64, 0'u64),
+          (1'u64, 1'u64),
+          (2'u64, 12'u64),
+          (3'u64, 2'u64),
+          (6'u64, 3'u64),
+        ]
+    for i in 0 .. count:
+      check order[].playlist[][i] == expected[i][0]
+      check tags.getTrackNum(expected[i][0]) == expected[i][1]
+
+  teardown:
+    tags.unsetTags()
 
 suite "Spec check":
   setup:
     const m3uStr = staticRead("samples/spectest.m3u")
+    var tags = tagsFromBuffer(m3uStr)
 
-  test "parse and read":
-    skip()
-    #debugEcho m3uStr
+  test "global tag":
+    check tags.getAlbum(0'u64) == cstring"Something"
+    check tags.getArranger(0'u64) == cstring"C"
+
+  test "subtune 1":
+    check tags.getArtist(1'u64) == cstring"Why would you do this?"
+    check tags.getTitle(1'u64) == cstring "Music A"
+    check tags.getAlbum(1'u64) == cstring"Something"
+    check tags.getArranger(1'u64) == cstring"C"
+    check tags.getTrackNum(1'u64) == 1
+
+  test "subtune 2":
+    check tags.getArtist(2'u64) == cstring""
+    check tags.getTitle(2'u64) == cstring "Music B"
+    check tags.getAlbum(2'u64) == cstring"Something"
+    check tags.getArranger(2'u64) == cstring"C"
+    check tags.getTrackNum(1'u64) == 2
+
+  test "subtune 5":
+    check tags.getTitle(5'u64) == cstring "B"
+    check tags.getAlbum(5'u64) == cstring"B"
+    check tags.getCompany(5'u64) == cstring"B"
+    check tags.getPublisher(5'u64) == cstring"B"
+    check tags.getArtist(5'u64) == cstring"B"
+    check tags.getComposer(5'u64) == cstring"B"
+    check tags.getArranger(5'u64) == cstring"A"
+    check tags.getSequencer(5'u64) == cstring"B"
+    check tags.getEngineer(5'u64) == cstring"B"
+    check tags.getRipper(5'u64) == cstring"B"
+    check tags.getTagger(5'u64) == cstring"B"
+    check tags.getCopyright(5'u64) == cstring"B"
+    check tags.getTrackNum(1'u64) == 0
+
+  teardown:
+    tags.unsetTags()
