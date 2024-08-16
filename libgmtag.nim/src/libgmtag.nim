@@ -135,7 +135,7 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
     trackNum = 1
     commentBuffer: seq[string] = @[]
     customTrackNum = -1
-  
+
   for line in ($buffer).splitLines():
     var trimmed = line.strip()
 
@@ -264,19 +264,21 @@ proc get_subtune_order*(
   var i = 0
   p[].count = containerSize
   if containerSize > 1:
-    let orderArray = cast[ptr UncheckedArray[uint64]](alloc0Impl(
-      sizeof(uint64) * (len(container))
-    ))
+    let orderArray =
+      cast[ptr UncheckedArray[uint64]](alloc0Impl(sizeof(uint64) * (len(container))))
     for subtuneId in container.keys:
       orderArray[i] = subtuneId
       i += 1
     p[].playlist = orderArray
   return p
 
+template subtuneIsValid(handle: ptr TagContainer, subtune: uint64): bool =
+  (handle != nil) and (handle[].len > 0) and (subtune in handle[])
+
 proc get_length_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
 ): int64 {.cdecl, exportc, dynlib.} =
-  if subtune > handle.get_subtune_count() or handle == nil:
+  if not handle.subtuneIsValid(subtune):
     return -1
   let tagInfo = handle[][subtune]
   return ((tagInfo.length.seconds * 1000) + tagInfo.length.miliseconds).int64
@@ -284,7 +286,7 @@ proc get_length_of_subtune*(
 proc get_fade_length_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
 ): int64 {.cdecl, exportc, dynlib.} =
-  if subtune > handle.get_subtune_count() or handle == nil:
+  if not handle.subtuneIsValid(subtune):
     return -1
   let tagInfo = handle[][subtune]
   return ((tagInfo.fade.seconds * 1000) + tagInfo.fade.miliseconds).int64
@@ -304,6 +306,8 @@ proc makeCopyOf(s: string): cstring =
   ## copies of the string so that whoever calls it can keep it
   ## when the tag handler is destroyed, I might as well
   ## emulate that here.
+  if len(s) < 1:
+    return nil
   let n: cstring = cast[cstring](alloc0Impl(len(s) + 1))
   cast[pointer](n).copyMem(s[0].addr, len(s))
   return n
@@ -311,96 +315,132 @@ proc makeCopyOf(s: string): cstring =
 proc get_album*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].album.makeCopyOf())
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].album.makeCopyOf()
+  )
 
 proc get_company*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].company.makeCopyOf())
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].company.makeCopyOf()
+  )
 
 proc get_publisher*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil
-  else: handle[][subtune].publisher.makeCopyOf()
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].publisher.makeCopyOf()
   )
 
 proc get_artist*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].artist.makeCopyOf())
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].artist.makeCopyOf()
+  )
 
 proc get_composer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil
-  else: handle[][subtune].composer.makeCopyOf()
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].composer.makeCopyOf()
   )
 
 proc get_sequencer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil
-  else: handle[][subtune].sequencer.makeCopyOf()
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].sequencer.makeCopyOf()
   )
 
 proc get_arranger*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil
-  else: handle[][subtune].arranger.makeCopyOf()
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].arranger.makeCopyOf()
   )
 
 proc get_engineer*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil
-  else: handle[][subtune].engineer.makeCopyOf()
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].engineer.makeCopyOf()
   )
 
 proc get_ripper*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].ripper.makeCopyOf())
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].ripper.makeCopyOf()
+  )
 
 proc get_tagger*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].tagger.makeCopyOf())
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].tagger.makeCopyOf()
+  )
 
 proc get_title*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].title.makeCopyOf())
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].title.makeCopyOf()
+  )
 
 proc get_comment*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil else: handle[][subtune].comments.makeCopyOf())
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].comments.makeCopyOf()
+  )
 
 proc get_copyright*(
     handle: ptr TagContainer, subtune: uint64
 ): cstring {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: nil
-  else: handle[][subtune].copyright.makeCopyOf()
+  return (
+    if not handle.subtuneIsValid(subtune): nil
+    else: handle[][subtune].copyright.makeCopyOf()
   )
 
 proc get_track_num*(
     handle: ptr TagContainer, subtune: uint64
 ): uint64 {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: 0 else: handle[][subtune].track.uint64)
+  return (if not handle.subtuneIsValid(subtune): 0
+  else: handle[][subtune].track.uint64
+  )
 
 proc get_date*(
     handle: ptr TagContainer, subtune: uint64
 ): DateDef {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: DateDef() else: handle[][subtune].date)
+  return (if not handle.subtuneIsValid(subtune): DateDef()
+  else: handle[][subtune].date
+  )
 
 proc get_length*(
     handle: ptr TagContainer, subtune: uint64
 ): TimeDef {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: TimeDef() else: handle[][subtune].length)
+  return
+    (if not handle.subtuneIsValid(subtune): TimeDef()
+    else: handle[][subtune].length
+    )
 
 proc get_fade*(
     handle: ptr TagContainer, subtune: uint64
 ): TimeDef {.cdecl, exportc, dynlib.} =
-  return (if handle == nil: TimeDef() else: handle[][subtune].fade)
+  return (if not handle.subtuneIsValid(subtune): TimeDef()
+  else: handle[][subtune].fade
+  )
