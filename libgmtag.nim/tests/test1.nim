@@ -1,6 +1,9 @@
 import unittest2
 import libgmtag
 
+when defined(showStruct):
+  import pretty
+
 proc timeToMs(h, m, s, ms: int): int64 =
   return (((s + (m * 60) + (h * 3600)) * 1000) + ms).int64
 
@@ -60,12 +63,14 @@ suite "Katakis 3D m3u":
         (18, cstring"Crush Boom Bang", timeToMs(0, 0, 7, 0)),
       ]
     for i in albumData:
-      check tags.getTitle(i[0].uint64) == i[1]
-      check tags.getDurationOfSubtune(i[0].uint64) == i[2]
+      check:
+        tags.getTitle(i[0].uint64) == i[1]
+        tags.getDurationOfSubtune(i[0].uint64) == i[2]
       # special check for "Secret Cycles"
       if i[0] == 7:
-        check tags.getLengthOfSubtune(7'u64) == timeToMs(0, 1, 52, 0)
-        check tags.getFadeLengthOfSubtune(7'u64) == timeToMs(0, 0, 10, 0)
+        check:
+          tags.getLengthOfSubtune(7'u64) == timeToMs(0, 1, 52, 0)
+          tags.getFadeLengthOfSubtune(7'u64) == timeToMs(0, 0, 10, 0)
 
   test "playlist order":
     let order = tags.getSubtuneOrder()
@@ -101,8 +106,9 @@ suite "Badly-formatted m3u":
           (6'u64, 3'u64),
         ]
     for i in 0 .. count:
-      check order[].playlist[][i] == expected[i][0]
-      check tags.getTrackNum(expected[i][0]) == expected[i][1]
+      check:
+        order[].playlist[][i] == expected[i][0]
+        tags.getTrackNum(expected[i][0]) == expected[i][1]
 
   teardown:
     tags.unsetTags()
@@ -113,37 +119,48 @@ suite "Spec check":
     var tags = tagsFromBuffer(m3uStr)
 
   test "global tag":
-    check tags.getAlbum(0'u64) == cstring"Something"
-    check tags.getArranger(0'u64) == cstring"C"
+    check:
+      tags.getAlbum(0'u64) == cstring"Something"
+      tags.getArranger(0'u64) == cstring"C"
 
   test "subtune 1":
-    check tags.getArtist(1'u64) == cstring"Why would you do this?"
-    check tags.getTitle(1'u64) == cstring "Music A"
-    check tags.getAlbum(1'u64) == cstring"Something"
-    check tags.getArranger(1'u64) == cstring"C"
-    check tags.getTrackNum(1'u64) == 1
+    check:
+      tags.getArtist(1'u64) == cstring"Why would you do this?"
+      tags.getTitle(1'u64) == cstring "Music A"
+      tags.getAlbum(1'u64) == cstring"Something"
+      tags.getArranger(1'u64) == cstring"C"
+      tags.getTrackNum(1'u64) == 1
 
   test "subtune 2":
-    check tags.getArtist(2'u64) == cstring""
-    check tags.getTitle(2'u64) == cstring "Music B"
-    check tags.getAlbum(2'u64) == cstring"Something"
-    check tags.getArranger(2'u64) == cstring"C"
-    check tags.getTrackNum(1'u64) == 2
+    check:
+      tags.getArtist(2'u64) == cstring""
+      tags.getTitle(2'u64) == cstring "Music B"
+      tags.getAlbum(2'u64) == cstring"Something"
+      tags.getArranger(2'u64) == cstring"C"
+      tags.getTrackNum(2'u64) == 2
 
   test "subtune 5":
-    check tags.getTitle(5'u64) == cstring "B"
-    check tags.getAlbum(5'u64) == cstring"B"
-    check tags.getCompany(5'u64) == cstring"B"
-    check tags.getPublisher(5'u64) == cstring"B"
-    check tags.getArtist(5'u64) == cstring"B"
-    check tags.getComposer(5'u64) == cstring"B"
-    check tags.getArranger(5'u64) == cstring"A"
-    check tags.getSequencer(5'u64) == cstring"B"
-    check tags.getEngineer(5'u64) == cstring"B"
-    check tags.getRipper(5'u64) == cstring"B"
-    check tags.getTagger(5'u64) == cstring"B"
-    check tags.getCopyright(5'u64) == cstring"B"
-    check tags.getTrackNum(1'u64) == 0
+    check:
+      tags.getTitle(5'u64) == cstring "B"
+      tags.getAlbum(5'u64) == cstring"B"
+      tags.getCompany(5'u64) == cstring"B"
+      tags.getPublisher(5'u64) == cstring"B"
+      tags.getArtist(5'u64) == cstring"B"
+      tags.getComposer(5'u64) == cstring"B"
+      tags.getArranger(5'u64) == cstring"A"
+      tags.getSequencer(5'u64) == cstring"B"
+      tags.getEngineer(5'u64) == cstring"B"
+      tags.getRipper(5'u64) == cstring"B"
+      tags.getTagger(5'u64) == cstring"B"
+      tags.getCopyright(5'u64) == cstring"B"
+      tags.getTrackNum(5'u64) == 0
+
+  when defined(showStruct):
+    test "show structure":
+      for i in tags[].keys:
+        print(i)
+        print(tags[][i])
+      skip()
 
   teardown:
     tags.unsetTags()
