@@ -1,4 +1,5 @@
 # @album Something
+# @arranger C
 # %title Music A
 ABC.nsf?1
 # %title Music B
@@ -12,6 +13,7 @@ ABC.nsf?1
 # %publisher A
 # %artist A
 # %composer A
+# %arranger A
 # %sequencer A
 # %engineer A
 # %ripper A
