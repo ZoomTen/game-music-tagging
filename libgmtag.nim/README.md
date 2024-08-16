@@ -10,7 +10,7 @@ All return values are a `ptr` (untraced reference) in Nim's point of view so as 
 
 This library is able to be imported from other Nim applications, however the above should be kept in mind.
 
-Not all exceptions/defects have been dealt with, but they should not happen in normal operation.
+Exceptions/defects should not happen in normal operation. When used from Nim, they will be converted into generic `ref CatchableErrors`, but when used from other languages will fall back into ignoring the current operation (`tags_from_buffer`) or returning a sentinel error value `get_*`.
 
 ## Building
 

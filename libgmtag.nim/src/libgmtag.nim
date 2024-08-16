@@ -3,7 +3,33 @@ import std/parseutils
 import ./datatypes
 export datatypes
 
-proc toTime(buffer: string): TimeDef =
+{.push raises: [].}
+
+template ifTheFollowingErroredOut(
+    doInstead: untyped, #[ what to do when handled ]#
+    body: untyped,
+) =
+  ## WARNING: This will turn your `specific error` into a `ref CatchableError` :(
+  try:
+    body
+  except CatchableError as e:
+    # this is meant to catch *any* exception
+    when not defined(isLibrary):
+      raise e
+    else:
+      doInstead
+
+template conditionalReraise(body: untyped) =
+  ## WARNING: This will turn your `specific error` into a `ref CatchableError` :(
+  try:
+    body
+  except CatchableError as e:
+    when not defined(isLibrary):
+      raise e
+    else:
+      discard
+
+proc toTime(buffer: string): TimeDef {.raises: [ValueError].} =
   var r = TimeDef()
   type
     tkKind = enum
@@ -84,7 +110,7 @@ proc toTime(buffer: string): TimeDef =
     discard
   return r
 
-proc toDate(buffer: string): DateDef =
+proc toDate(buffer: string): DateDef {.raises: [ValueError].} =
   var r = DateDef()
   type which = enum
     Year
@@ -165,7 +191,9 @@ proc mergeTags(a: var TagData, b: TagData): void =
     a.fade = b.fade
   discard
 
-proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynlib.} =
+proc tags_from_buffer*(
+    buffer: cstring
+): ptr TagContainer {.cdecl, exportc, dynlib, raises: [CatchableError].} =
   let newTags = cast[ptr TagContainer](alloc0Impl(sizeof(TagContainer)))
   var
     curtag: TagData
@@ -212,13 +240,17 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
       of "copyright":
         curtag.copyright = content
       of "date":
-        curtag.date = content.toDate()
+        conditionalReraise:
+          curtag.date = content.toDate()
       of "length":
-        curtag.length = content.toTime()
+        conditionalReraise:
+          curtag.length = content.toTime()
       of "fade":
-        curtag.fade = content.toTime()
+        conditionalReraise:
+          curtag.fade = content.toTime()
       of "track":
-        customTrackNum = content.parseInt()
+        conditionalReraise:
+          customTrackNum = content.parseInt()
       of "comment":
         commentBuffer.add(content)
         if len(curtag.comments) > 0:
@@ -253,22 +285,23 @@ proc tags_from_buffer*(buffer: cstring): ptr TagContainer {.cdecl, exportc, dynl
         # error here
         discard
       else:
-        let
-          numStr = trimmed[qmarkNumberBeginsAt + 1 ..^ 1]
-          subtuneNum = numStr.parseInt()
-        if customTrackNum > -1:
-          curtag.track = customTrackNum
-          customTrackNum = -1
-        else:
-          if subtuneNum.uint64 notIn newTags[]:
-            curtag.track = trackNum
-            trackNum += 1
-        if subtuneNum.uint64 in newTags[]:
-          newTags[][subtuneNum.uint64].mergeTags(curtag)
-        else:
-          newTags[][subtuneNum.uint64] = curtag
-        # reset to "global" tags
-        curtag = newTags[][0]
+        conditionalReraise:
+          let
+            numStr = trimmed[qmarkNumberBeginsAt + 1 ..^ 1]
+            subtuneNum = numStr.parseInt()
+          if customTrackNum > -1:
+            curtag.track = customTrackNum
+            customTrackNum = -1
+          else:
+            if subtuneNum.uint64 notIn newTags[]:
+              curtag.track = trackNum
+              trackNum += 1
+          if subtuneNum.uint64 in newTags[]:
+            newTags[][subtuneNum.uint64].mergeTags(curtag)
+          else:
+            newTags[][subtuneNum.uint64] = curtag
+          # reset to "global" tags
+          curtag = newTags[][0]
   return newTags
 
 proc unset_tags*(handle: ptr TagContainer): void {.cdecl, exportc, dynlib.} =
@@ -318,23 +351,29 @@ template subtuneIsValid(handle: ptr TagContainer, subtune: uint64): bool =
 
 proc get_length_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
-): int64 {.cdecl, exportc, dynlib.} =
+): int64 {.cdecl, exportc, dynlib, raises: [CatchableError].} =
   if not handle.subtuneIsValid(subtune):
     return -1
-  let tagInfo = handle[][subtune]
-  return ((tagInfo.length.seconds * 1000) + tagInfo.length.miliseconds).int64
+  ifTheFollowingErroredOut:
+    return -1
+  do:
+    let tagInfo = handle[][subtune]
+    return ((tagInfo.length.seconds * 1000) + tagInfo.length.miliseconds).int64
 
 proc get_fade_length_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
-): int64 {.cdecl, exportc, dynlib.} =
+): int64 {.cdecl, exportc, dynlib, raises: [CatchableError].} =
   if not handle.subtuneIsValid(subtune):
     return -1
-  let tagInfo = handle[][subtune]
-  return ((tagInfo.fade.seconds * 1000) + tagInfo.fade.miliseconds).int64
+  ifTheFollowingErroredOut:
+    return -1
+  do:
+    let tagInfo = handle[][subtune]
+    return ((tagInfo.fade.seconds * 1000) + tagInfo.fade.miliseconds).int64
 
 proc get_duration_of_subtune*(
     handle: ptr TagContainer, subtune: uint64
-): int64 {.cdecl, exportc, dynlib.} =
+): int64 {.cdecl, exportc, dynlib, raises: [CatchableError].} =
   let
     stLen = handle.get_length_of_subtune(subtune)
     stFadeLen = handle.get_fade_length_of_subtune(subtune)
@@ -356,133 +395,170 @@ proc makeCopyOf(s: string): cstring =
 
 proc get_album*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].album.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].album.makeCopyOf()
 
 proc get_company*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].company.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].company.makeCopyOf()
 
 proc get_publisher*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].publisher.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].publisher.makeCopyOf()
 
 proc get_artist*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].artist.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].artist.makeCopyOf()
 
 proc get_composer*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].composer.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].composer.makeCopyOf()
 
 proc get_sequencer*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].sequencer.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].sequencer.makeCopyOf()
 
 proc get_arranger*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].arranger.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].arranger.makeCopyOf()
 
 proc get_engineer*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].engineer.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].engineer.makeCopyOf()
 
 proc get_ripper*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].ripper.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].ripper.makeCopyOf()
 
 proc get_tagger*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].tagger.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].tagger.makeCopyOf()
 
 proc get_title*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].title.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].title.makeCopyOf()
 
 proc get_comment*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].comments.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].comments.makeCopyOf()
 
 proc get_copyright*(
     handle: ptr TagContainer, subtune: uint64
-): cstring {.cdecl, exportc, dynlib.} =
-  return (
-    if not handle.subtuneIsValid(subtune): nil
-    else: handle[][subtune].copyright.makeCopyOf()
-  )
+): cstring {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return nil
+  ifTheFollowingErroredOut:
+    return nil
+  do:
+    return handle[][subtune].copyright.makeCopyOf()
 
 proc get_track_num*(
     handle: ptr TagContainer, subtune: uint64
-): uint64 {.cdecl, exportc, dynlib.} =
-  return (if not handle.subtuneIsValid(subtune): 0
-  else: handle[][subtune].track.uint64
-  )
+): uint64 {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return 0
+  ifTheFollowingErroredOut:
+    return 0
+  do:
+    return handle[][subtune].track.uint64
 
 proc get_date*(
     handle: ptr TagContainer, subtune: uint64
-): DateDef {.cdecl, exportc, dynlib.} =
-  return (if not handle.subtuneIsValid(subtune): DateDef()
-  else: handle[][subtune].date
-  )
+): DateDef {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return DateDef()
+  ifTheFollowingErroredOut:
+    return DateDef()
+  do:
+    return handle[][subtune].date
 
 proc get_length*(
     handle: ptr TagContainer, subtune: uint64
-): TimeDef {.cdecl, exportc, dynlib.} =
-  return
-    (if not handle.subtuneIsValid(subtune): TimeDef()
-    else: handle[][subtune].length
-    )
+): TimeDef {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return TimeDef()
+  ifTheFollowingErroredOut:
+    return TimeDef()
+  do:
+    return handle[][subtune].length
 
 proc get_fade*(
     handle: ptr TagContainer, subtune: uint64
-): TimeDef {.cdecl, exportc, dynlib.} =
-  return (if not handle.subtuneIsValid(subtune): TimeDef()
-  else: handle[][subtune].fade
-  )
+): TimeDef {.cdecl, exportc, dynlib, raises: [CatchableError].} =
+  if not handle.subtuneIsValid(subtune):
+    return TimeDef()
+  ifTheFollowingErroredOut:
+    return TimeDef()
+  do:
+    return handle[][subtune].fade
